@@ -1,8 +1,10 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import React, { useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Clock, Users, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Target, Clock, Users, TrendingUp, PieChart as PieChartIcon, Zap } from 'lucide-react';
+import WhatIfSimulator from '../WhatIfSimulator';
 
 interface FinancialGoal {
   id: string;
@@ -24,6 +26,8 @@ const OverallGoalsTimeline: React.FC<OverallGoalsTimelineProps> = ({
   monthlySavings,
   className = ""
 }) => {
+  const [showPieChart, setShowPieChart] = useState(false);
+  const [showWhatIf, setShowWhatIf] = useState(false);
   const categoryColors = {
     emergency: '#ef4444',
     investment: '#8b5cf6',
@@ -278,6 +282,139 @@ const OverallGoalsTimeline: React.FC<OverallGoalsTimelineProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Pie Chart and What If Controls */}
+          <div className="flex gap-3 pt-4 border-t border-gray-700">
+            <Button
+              onClick={() => setShowPieChart(!showPieChart)}
+              variant="outline"
+              className="flex-1 cosmic-button border-stellar-gold text-stellar-gold hover:bg-stellar-gold/10"
+            >
+              <PieChartIcon className="w-4 h-4 mr-2" />
+              {showPieChart ? 'Hide' : 'Show'} Goals Distribution
+            </Button>
+            
+            <Button
+              onClick={() => setShowWhatIf(!showWhatIf)}
+              variant="outline"
+              className="flex-1 cosmic-button border-neon-cyan text-neon-cyan hover:bg-neon-cyan/10"
+            >
+              <Zap className="w-4 h-4 mr-2" />
+              {showWhatIf ? 'Hide' : 'Show'} Overall What If
+            </Button>
+          </div>
+
+          {/* Goals Pie Chart */}
+          {showPieChart && (
+            <div className="mt-6 pt-6 border-t border-gray-700">
+              <h4 className="text-lg font-orbitron text-stellar-gold flex items-center gap-2 mb-4">
+                <PieChartIcon className="w-5 h-5" />
+                Goals Distribution by Amount
+              </h4>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Pie Chart */}
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={goals.map((goal, index) => ({
+                          name: goal.description,
+                          value: goal.targetAmount,
+                          color: categoryColors[goal.category],
+                          priority: goal.priority
+                        }))}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={120}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {goals.map((goal, index) => (
+                          <Cell key={`cell-${index}`} fill={categoryColors[goal.category]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1F2937',
+                          border: '1px solid #374151',
+                          borderRadius: '8px',
+                          color: '#F3F4F6'
+                        }}
+                        formatter={(value: any) => [`₹${value.toLocaleString()}`, 'Target Amount']}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Legend */}
+                <div className="space-y-3">
+                  <h5 className="text-sm font-medium text-gray-300">Goals by Category & Priority</h5>
+                  {goals.map((goal, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 cosmic-card-inner">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-4 h-4 rounded"
+                          style={{ backgroundColor: categoryColors[goal.category] }}
+                        />
+                        <div>
+                          <div className="text-sm font-medium text-white">{goal.description}</div>
+                          <div className="text-xs text-gray-400">{goal.category}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-right">
+                        <Badge 
+                          variant="outline" 
+                          className="mb-1"
+                          style={{ 
+                            borderColor: priorityColors[goal.priority], 
+                            color: priorityColors[goal.priority] 
+                          }}
+                        >
+                          {goal.priority.toUpperCase()}
+                        </Badge>
+                        <div className="text-sm font-medium text-neon-cyan">
+                          ₹{goal.targetAmount.toLocaleString()}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {((goal.targetAmount / goals.reduce((sum, g) => sum + g.targetAmount, 0)) * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Overall What If Simulator */}
+          {showWhatIf && (
+            <div className="mt-6 pt-6 border-t border-gray-700">
+              <WhatIfSimulator
+                questionnaireId={`overall-goals-${Date.now()}`}
+                initialData={{
+                  income: { monthly: monthlySavings * 2 },
+                  expenses: { total: monthlySavings },
+                  currentSavings: goals.reduce((sum, goal) => sum + goal.currentAmount, 0),
+                  financialGoals: goals,
+                  spendingBreakdown: {
+                    savings: monthlySavings * 0.6,
+                    investments: monthlySavings * 0.4,
+                    housing: monthlySavings * 1.2,
+                    food: monthlySavings * 0.8,
+                    transportation: monthlySavings * 0.4,
+                    entertainment: monthlySavings * 0.3,
+                    utilities: monthlySavings * 0.2,
+                    healthcare: monthlySavings * 0.1,
+                    other: monthlySavings * 0.1
+                  }
+                }}
+                className="bg-gray-800/50 rounded-lg p-6"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

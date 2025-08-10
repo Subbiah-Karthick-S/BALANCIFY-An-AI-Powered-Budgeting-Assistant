@@ -11,7 +11,7 @@ import { AIInsights } from '@/components/dashboard/AIInsights';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import { ComparisonTable } from '@/components/dashboard/ComparisonTable';
 import { AnalysisResult } from '@/types/financial';
-import { Download, RotateCcw, LogOut, Target } from 'lucide-react';
+import { Download, RotateCcw, LogOut, Target, Home } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import IndividualGoalChart from '@/components/charts/IndividualGoalChart';
@@ -21,9 +21,10 @@ import { useSession } from '@/hooks/useSession';
 interface DashboardPageProps {
   analysisResult: AnalysisResult;
   onStartNew: () => void;
+  onBackToHome?: () => void;
 }
 
-export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps) {
+export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: DashboardPageProps) {
   const { toast } = useToast();
   const { session, endSession } = useSession();
 
@@ -137,14 +138,26 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
               <p className="text-xl text-gray-300">Your Financial Cosmos Mapped</p>
             </div>
             
-            <Button
-              onClick={handleEndSession}
-              variant="outline"
-              className="cosmic-button border-red-500 text-red-400 hover:bg-red-500/10"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              End Session
-            </Button>
+            <div className="flex gap-3">
+              {onBackToHome && (
+                <Button
+                  onClick={onBackToHome}
+                  variant="outline"
+                  className="cosmic-button border-neon-cyan text-neon-cyan hover:bg-neon-cyan/10"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Back to Home
+                </Button>
+              )}
+              <Button
+                onClick={handleEndSession}
+                variant="outline"
+                className="cosmic-button border-red-500 text-red-400 hover:bg-red-500/10"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                End Session
+              </Button>
+            </div>
           </div>
 
           {/* Main Dashboard Grid */}
@@ -273,27 +286,29 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
             </div>
           )}
 
-          {/* Primary Goal Timeline (for single goal or summary) */}
-          <Card className="cosmic-card mb-8">
-            <CardContent className="p-8">
-              <GoalTimelineChart
-                data={analysisResult.goalTimeline.milestones.map((milestone, index) => ({
-                  month: `Month ${milestone.month}`,
-                  currentProgress: milestone.amount,
-                  projectedProgress: milestone.amount + (analysisResult.goalTimeline.monthlyContribution * (index + 1)),
-                  simulatedProgress: 0,
-                  goalTarget: analysisResult.goalTimeline.targetAmount,
-                  milestone: milestone.description
-                }))}
-                goalName={analysisResult.financialGoals?.[0]?.description || "Primary Financial Goal"}
-                targetAmount={analysisResult.goalTimeline.targetAmount}
-                currentAmount={analysisResult.goalTimeline.currentSavings}
-                monthlyContribution={analysisResult.goalTimeline.monthlyContribution}
-                actualSavings={analysisResult.spendingBreakdown.savings}
-                projectedDate={`${new Date().getFullYear() + Math.ceil(analysisResult.goalTimeline.timeToGoal / 12)}-12-31`}
-              />
-            </CardContent>
-          </Card>
+          {/* Primary Goal Timeline (only for single goal, to avoid duplication) */}
+          {(!analysisResult.financialGoals || analysisResult.financialGoals.length <= 1) && (
+            <Card className="cosmic-card mb-8">
+              <CardContent className="p-8">
+                <GoalTimelineChart
+                  data={analysisResult.goalTimeline.milestones.map((milestone, index) => ({
+                    month: `Month ${milestone.month}`,
+                    currentProgress: milestone.amount,
+                    projectedProgress: milestone.amount + (analysisResult.goalTimeline.monthlyContribution * (index + 1)),
+                    simulatedProgress: 0,
+                    goalTarget: analysisResult.goalTimeline.targetAmount,
+                    milestone: milestone.description
+                  }))}
+                  goalName={analysisResult.financialGoals?.[0]?.description || "Primary Financial Goal"}
+                  targetAmount={analysisResult.goalTimeline.targetAmount}
+                  currentAmount={analysisResult.goalTimeline.currentSavings}
+                  monthlyContribution={analysisResult.goalTimeline.monthlyContribution}
+                  actualSavings={analysisResult.spendingBreakdown.savings}
+                  projectedDate={`${new Date().getFullYear() + Math.ceil(analysisResult.goalTimeline.timeToGoal / 12)}-12-31`}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Before/After Comparison */}
           <div className="mb-8">

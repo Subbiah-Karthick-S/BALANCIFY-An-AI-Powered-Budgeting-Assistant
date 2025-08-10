@@ -97,6 +97,7 @@ interface QuestionnairePageProps {
 }
 
 export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
+  const { session, createSession } = useSession();
   const {
     currentStep,
     formData,
@@ -111,6 +112,13 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
+
+  // Initialize session with user name when they first enter it
+  useEffect(() => {
+    if (formData.name && !session?.userName) {
+      createSession(formData.name);
+    }
+  }, [formData.name, session, createSession]);
 
   const handleNext = () => {
     if (currentStep === questions.length - 1) {

@@ -25,6 +25,10 @@ function App() {
 
   const handleStartNew = () => {
     setAnalysisResult(null);
+    setCurrentState('questionnaire'); // Go to questionnaire to maintain session
+  };
+
+  const handleBackToHome = () => {
     setCurrentState('home');
   };
 
@@ -39,6 +43,7 @@ function App() {
           <DashboardPage 
             analysisResult={analysisResult} 
             onStartNew={handleStartNew}
+            onBackToHome={handleBackToHome}
           />
         ) : null;
       default:
