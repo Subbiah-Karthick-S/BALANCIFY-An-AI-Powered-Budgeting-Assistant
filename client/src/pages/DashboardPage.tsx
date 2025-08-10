@@ -36,7 +36,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
       description: "Your session has been ended. You can start a new analysis anytime.",
     });
   };
-
+  
   const downloadReport = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/report/${analysisResult.questionnaireId}`);
@@ -52,7 +52,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-
+      
       toast({
         title: "Report Downloaded",
         description: "Your financial analysis report has been downloaded successfully.",
@@ -118,17 +118,10 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
 
   const totalExpenses = Object.values(analysisResult.spendingBreakdown).reduce((sum, val) => sum + val, 0) - analysisResult.spendingBreakdown.savings - analysisResult.spendingBreakdown.investments;
 
-  const spendingBreakdown = analysisResult.spendingBreakdown || {};
-  const needsWantsAnalysis = analysisResult.needsWantsAnalysis || { needsPercentage: 0, wantsPercentage: 0 };
-  const insights = analysisResult.insights || {};
-  const recommendations = analysisResult.recommendations || { immediate: [], shortTerm: [], longTerm: [] };
-  const goalTimeline = analysisResult.goalTimeline || { currentSavings: 0, targetAmount: 0, monthlyContribution: 0, timeToGoal: 0, milestones: [] };
-  const financialGoals = analysisResult.financialGoals || [];
-
   return (
     <div className="min-h-screen relative">
       <CosmicBackground />
-
+      
       <div className="relative z-10 py-20">
         <div className="max-w-7xl mx-auto px-4">
           {/* Dashboard Header with Session */}
@@ -144,7 +137,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
               )}
               <p className="text-xl text-gray-300">Your Financial Cosmos Mapped</p>
             </div>
-
+            
             <div className="flex gap-3">
               {onBackToHome && (
                 <Button
@@ -236,7 +229,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
           {/* Financial Goals Chart */}
           {analysisResult.financialGoals && analysisResult.financialGoals.length > 0 && (
             <div className="mb-8">
-              <FinancialGoalsChart
+              <FinancialGoalsChart 
                 goals={analysisResult.financialGoals}
                 monthlySavings={analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments}
               />
@@ -269,7 +262,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
                 </h3>
                 <p className="text-gray-300">Detailed breakdown and timeline for each of your financial goals</p>
               </div>
-
+              
               <div className="space-y-8">
                 {analysisResult.financialGoals.map((goal, index) => (
                   <IndividualGoalChart
@@ -357,7 +350,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
               <Download className="mr-3 w-5 h-5" />
               {downloadReport.isPending ? 'Generating...' : 'Download Mission Report (PDF)'}
             </Button>
-
+            
             <Button
               onClick={onStartNew}
               variant="outline"
