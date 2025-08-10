@@ -15,14 +15,20 @@ export function useQuestionnaire() {
       const sessionData = getSessionData();
       const sessionStep = getCurrentStep();
       
+      console.log('Loading session data on mount:', { sessionData, sessionStep });
+      
       if (sessionData && Object.keys(sessionData).length > 0) {
+        console.log('Setting form data from session:', sessionData);
         setFormData(sessionData);
       }
       if (sessionStep >= 0) {
+        console.log('Setting current step from session:', sessionStep);
         setCurrentStep(sessionStep);
       }
+    } else {
+      console.log('No active session found on mount');
     }
-  }, []);
+  }, [hasActiveSession, getSessionData, getCurrentStep]);
 
   const submitQuestionnaire = useMutation({
     mutationFn: async (data: FinancialData): Promise<AnalysisResult> => {

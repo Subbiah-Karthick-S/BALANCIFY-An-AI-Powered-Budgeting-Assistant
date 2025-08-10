@@ -129,17 +129,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
             that adapt to your lifestyle.
           </p>
 
-          {/* Debug Section - Remove after testing */}
-          <div className="mb-4 p-4 bg-gray-800 rounded text-sm">
-            <p>Debug: hasActiveSession() = {String(hasActiveSession())}</p>
-            <p>Debug: session = {JSON.stringify(session || {})}</p>
-            <Button onClick={() => testSessionCreation('TestUser')} className="mt-2 mr-2" size="sm">
-              Create Test Session
-            </Button>
-            <Button onClick={debugSession} className="mt-2" size="sm" variant="outline">
-              Debug Session
-            </Button>
-          </div>
+
 
           {/* Session Recovery Section */}
           {hasActiveSession() && (
@@ -152,6 +142,9 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
                 <p className="text-gray-300 mb-4">
                   Found an active session from {session?.userName}. You can continue from step {(session?.currentStep || 0) + 1} 
                   or start fresh.
+                </p>
+                <p className="text-xs text-gray-400 mb-4">
+                  Saved data: {Object.keys(session?.formData || {}).join(', ')}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 

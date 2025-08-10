@@ -51,11 +51,15 @@ export function useSession() {
   };
 
   const getSessionData = () => {
-    return session?.formData || {};
+    // Get data directly from localStorage to ensure we have the latest
+    const sessionData = sessionStorage.getSessionData();
+    return sessionData?.formData || {};
   };
 
   const getCurrentStep = () => {
-    return session?.currentStep || 0;
+    // Get step directly from localStorage to ensure we have the latest
+    const sessionData = sessionStorage.getSessionData();
+    return sessionData?.currentStep || 0;
   };
 
   // Create server session when questionnaire is completed
