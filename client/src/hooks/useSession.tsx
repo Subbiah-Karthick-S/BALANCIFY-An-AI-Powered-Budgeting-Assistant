@@ -6,8 +6,11 @@ interface SessionData {
   startTime: Date;
   isActive: boolean;
   questionnaireCompleted: boolean;
+  currentStep: number;
+  totalSteps: number;
   analysisResult?: any;
   formData?: any; // Store questionnaire progress
+  questionnaireData?: any; // Store submitted questionnaire
 }
 
 export function useSession() {
@@ -41,14 +44,16 @@ export function useSession() {
     }
   }, [session]);
 
-  const createSession = (userName: string) => {
+  const createSession = (userName: string, totalSteps: number = 8) => {
     // Always create a fresh session when called
     const newSession: SessionData = {
       sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userName,
       startTime: new Date(),
       isActive: true,
-      questionnaireCompleted: false
+      questionnaireCompleted: false,
+      currentStep: 0,
+      totalSteps
     };
     setSession(newSession);
     return newSession;
@@ -76,7 +81,39 @@ export function useSession() {
   };
 
   const hasActiveSession = () => {
-    return session?.isActive && !session?.questionnaireCompleted;
+    return session?.isActive;
+  };
+
+  const hasCompletedQuestionnaire = () => {
+    return session?.questionnaireCompleted && session?.analysisResult;
+  };
+
+  const saveFormProgress = (stepData: any, currentStep: number) => {
+    if (session) {
+      const updatedFormData = { ...session.formData, ...stepData };
+      updateSession({ 
+        formData: updatedFormData, 
+        currentStep: Math.max(currentStep, session.currentStep || 0)
+      });
+    }
+  };
+
+  const saveQuestionnaireData = (questionnaireData: any) => {
+    if (session) {
+      updateSession({ 
+        questionnaireData,
+        questionnaireCompleted: true 
+      });
+    }
+  };
+
+  const resetToQuestionnaire = () => {
+    if (session) {
+      updateSession({ 
+        isActive: true,
+        // Keep questionnaire data and form data but allow re-analysis
+      });
+    }
   };
 
   return {
@@ -85,6 +122,10 @@ export function useSession() {
     updateSession,
     completeSession,
     endSession,
-    hasActiveSession
+    hasActiveSession,
+    hasCompletedQuestionnaire,
+    saveFormProgress,
+    saveQuestionnaireData,
+    resetToQuestionnaire
   };
 }

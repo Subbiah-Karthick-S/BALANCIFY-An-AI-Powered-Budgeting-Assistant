@@ -109,8 +109,9 @@ export function useQuestionnaire() {
     submitQuestionnaire.reset();
   };
 
-  const loadFormDataFromSession = (sessionData: Partial<FinancialData>) => {
+  const loadFormDataFromSession = (sessionData: Partial<FinancialData>, currentStep: number = 0) => {
     setFormData(prev => ({ ...prev, ...sessionData }));
+    setCurrentStep(currentStep);
   };
 
   return {
