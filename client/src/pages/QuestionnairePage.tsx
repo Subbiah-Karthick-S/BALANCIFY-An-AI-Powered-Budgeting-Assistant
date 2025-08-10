@@ -1,10 +1,9 @@
 import { QuestionForm } from '@/components/questionnaire/QuestionForm';
 import { CosmicBackground } from '@/components/ui/cosmic-background';
 import { useQuestionnaire } from '@/hooks/useQuestionnaire';
-import { Question, FinancialData } from '@/types/financial';
+import { Question } from '@/types/financial';
 import { useEffect } from 'react';
 import { useSession } from '@/hooks/useSession';
-import { useToast } from '@/hooks/use-toast';
 
 const questions: Question[] = [
   {
@@ -98,8 +97,7 @@ interface QuestionnairePageProps {
 }
 
 export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
-  const { session, createSession, hasActiveSession } = useSession();
-  const { toast } = useToast();
+  const { session, createSession, updateSession } = useSession();
   const {
     currentStep,
     formData,
@@ -107,36 +105,24 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
     nextStep,
     prevStep,
     submitQuestionnaire,
+    loadFormDataFromSession,
     isSubmitting,
     analysisResult,
     error,
   } = useQuestionnaire();
 
-  // Show session recovery notification on first render
-  useEffect(() => {
-    if (hasActiveSession() && session) {
-      toast({
-        title: "Session Restored",
-        description: `Welcome back! Your progress has been restored from step ${(session.currentStep || 0) + 1}.`,
-      });
-    }
-  }, []); // Only run once on mount
-
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  // Simple form change handler with session creation
-  const handleFormChange = (newData: any) => {
-    console.log('Form change detected:', newData);
+  // Simple form change handler without complex session logic
+  const handleFormChange = (newData: Partial<FinancialData>) => {
     updateFormData(newData);
     
-    // Create session when user enters a name (length > 1)
-    if (newData.name && typeof newData.name === 'string' && newData.name.length > 1) {
+    // Create/update session only when user enters a real name (length > 1)
+    if (newData.name && newData.name.length > 1) {
       if (!session) {
-        console.log('Creating new session for:', newData.name);
         createSession(newData.name);
       } else if (session.userName !== newData.name) {
-        console.log('Updating session for new user:', newData.name);
         createSession(newData.name);
       }
     }

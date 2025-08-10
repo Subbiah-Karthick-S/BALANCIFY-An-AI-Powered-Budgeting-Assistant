@@ -1,13 +1,6 @@
 # Overview
 
-Balancify AI is a sophisticated financial budgeting assistant that provides AI-powered insights for lifestyle and needs-based consumption analysis. The application features an advanced space-themed dark interface with interactive 3D visualizations, charts, and animations. Users complete a comprehensive financial questionnaire with automatic session persistence and receive personalized AI analysis with spending breakdowns, recommendations, and goal timelines.
-
-## Recent Updates (January 2025)
-- **Session Management System**: Complete localStorage-based session persistence with 24-hour expiry
-- **Network Resilience**: Questionnaire data survives browser crashes, refreshes, and network issues
-- **Session Recovery**: Homepage detects active sessions and offers continuation from exact step
-- **Server-Side Sessions**: Post-questionnaire server session creation with unique session IDs
-- **Real Data Calculations**: What If simulator now uses actual user financial data instead of fallbacks
+Balancify AI is a sophisticated financial budgeting assistant that provides AI-powered insights for lifestyle and needs-based consumption analysis. The application features an advanced space-themed dark interface with interactive 3D visualizations, charts, and animations. Users complete a comprehensive financial questionnaire and receive personalized AI analysis with spending breakdowns, recommendations, and goal timelines.
 
 # User Preferences
 
@@ -21,18 +14,15 @@ Preferred communication style: Simple, everyday language.
 - **Theme**: Dark space/cosmic theme with custom CSS variables and animations
 - **State Management**: React Query (TanStack Query) for server state management and local React state for UI state
 - **Navigation**: Simple state-based navigation between Home, Questionnaire, and Dashboard pages
-- **Session Recovery**: Automatic detection and restoration of incomplete questionnaire sessions
 - **Charts**: Recharts library for advanced data visualizations including pie charts, bar charts, and line charts
 - **Forms**: React Hook Form with Zod validation for questionnaire data collection
-- **Session Persistence**: localStorage-based automatic saving with 24-hour session expiry
 
 ## Backend Architecture
 - **Runtime**: Node.js with Express.js server
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM for schema management and queries
 - **Development**: In-memory storage fallback for development/testing scenarios
-- **API Design**: Session-based RESTful endpoints with financial session management
-- **Session Management**: Server-side session storage with unique session IDs for analysis linking
+- **API Design**: RESTful endpoints for questionnaire submission, analysis retrieval, and report generation
 - **Build System**: ESBuild for production bundling with platform-specific optimizations
 
 ## Data Layer
@@ -60,8 +50,7 @@ Preferred communication style: Simple, everyday language.
 ## Core Infrastructure
 - **Database**: PostgreSQL via Neon Database serverless hosting
 - **AI Service**: Google Gemini AI API for financial analysis and insights
-- **Session Storage**: Browser localStorage for client-side persistence + in-memory server sessions
-- **Session Architecture**: Client localStorage → Server sessions → Analysis results with session linking
+- **Session Storage**: PostgreSQL with connect-pg-simple for session management
 
 ## Frontend Libraries
 - **UI Framework**: React 18 with TypeScript

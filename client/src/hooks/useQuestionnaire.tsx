@@ -1,54 +1,90 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { FinancialData, AnalysisResult } from '@/types/financial';
-import { useSession } from './useSession';
 
 export function useQuestionnaire() {
-  const { getSessionData, getCurrentStep, updateFormData: updateSessionFormData, hasActiveSession, createServerSession, completeSession } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Partial<FinancialData>>({});
 
-  // Load session data on component mount
-  useEffect(() => {
-    if (hasActiveSession()) {
-      const sessionData = getSessionData();
-      const sessionStep = getCurrentStep();
-      
-      console.log('Loading session data on mount:', { sessionData, sessionStep });
-      
-      if (sessionData && Object.keys(sessionData).length > 0) {
-        console.log('Setting form data from session:', sessionData);
-        setFormData(sessionData);
-      }
-      if (sessionStep >= 0) {
-        console.log('Setting current step from session:', sessionStep);
-        setCurrentStep(sessionStep);
-      }
-    } else {
-      console.log('No active session found on mount');
-    }
-  }, [hasActiveSession, getSessionData, getCurrentStep]);
-
   const submitQuestionnaire = useMutation({
     mutationFn: async (data: FinancialData): Promise<AnalysisResult> => {
-      // First create server session with questionnaire data
-      const sessionId = await createServerSession(data);
-      
-      // Mark local session as completed
-      completeSession(sessionId);
-      
-      // Now analyze the financial data using the session ID
-      const response = await fetch(`/api/analyze-session/${sessionId}`, {
+      // Ensure all required fields have default values
+      const sanitizedData = {
+        // Personal Information
+        name: data.name || "",
+        
+        // Salary & Income
+        monthly_income: data.monthly_income || 0,
+        side_income: data.side_income || "No",
+        side_income_amount: data.side_income_amount || 0,
+        bonus_pay: data.bonus_pay || "No",
+        
+        // Living Situation & Rent
+        housing_status: data.housing_status || "Rent",
+        housing_expenses: data.housing_expenses || 0,
+        utility_bills: data.utility_bills || 0,
+        household_size: Math.max(1, data.household_size || 1),
+        
+        // Food & Dining
+        groceries_weekly: data.groceries_weekly || 0,
+        dining_monthly: data.dining_monthly || 0,
+        food_ordering: data.food_ordering || "Rarely",
+        
+        // Shopping Habits
+        shopping_monthly: data.shopping_monthly || 0,
+        impulse_shopping: data.impulse_shopping || 1,
+        online_shopping: data.online_shopping || "Rarely",
+        
+        // Subscriptions & Entertainment
+        subscriptions: data.subscriptions || [],
+        subscription_cost: data.subscription_cost || 0,
+        entertainment_hours: data.entertainment_hours || 0,
+        
+        // Travel & Transportation
+        commute_cost: data.commute_cost || 0,
+        transport_mode: data.transport_mode || "Public Transport",
+        transport_monthly: data.transport_monthly || 0,
+        
+        // Debt / Loans
+        has_loans: data.has_loans || "No",
+        loan_repayment: data.loan_repayment || 0,
+        loan_type: data.loan_type || "Personal",
+        
+        // Investments & Financial Goals
+        investment_types: data.investment_types || [],
+        monthly_investment: data.monthly_investment || 0,
+        financial_goals: data.financial_goals || [{
+          description: "Emergency Fund",
+          target_amount: 500000,
+          timeline_months: 24,
+          priority: "high",
+          category: "emergency"
+        }],
+        
+        // Budgeting Behavior & Mindset
+        track_spending: data.track_spending || "No",
+        impulse_control: data.impulse_control || 1,
+        saving_behavior: data.saving_behavior || 1,
+        risk_taking: data.risk_taking || "Low",
+        
+        // Commitment & Willingness
+        expense_reduction: data.expense_reduction || 1,
+        preferred_savings: data.preferred_savings || 0,
+        financial_discipline: data.financial_discipline || 1
+      };
+
+      const response = await fetch('/api/questionnaire', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(sanitizedData),
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to analyze financial data');
+        throw new Error(errorData.error || 'Failed to submit questionnaire');
       }
       
       return response.json();
@@ -56,33 +92,15 @@ export function useQuestionnaire() {
   });
 
   const updateFormData = (stepData: Partial<FinancialData>) => {
-    const newFormData = { ...formData, ...stepData };
-    setFormData(newFormData);
-    
-    // Save to session automatically
-    if (hasActiveSession()) {
-      updateSessionFormData(newFormData, currentStep);
-    }
+    setFormData(prev => ({ ...prev, ...stepData }));
   };
 
   const nextStep = () => {
-    const newStep = currentStep + 1;
-    setCurrentStep(newStep);
-    
-    // Save step progress to session
-    if (hasActiveSession()) {
-      updateSessionFormData(formData, newStep);
-    }
+    setCurrentStep(prev => prev + 1);
   };
 
   const prevStep = () => {
-    const newStep = Math.max(0, currentStep - 1);
-    setCurrentStep(newStep);
-    
-    // Save step progress to session
-    if (hasActiveSession()) {
-      updateSessionFormData(formData, newStep);
-    }
+    setCurrentStep(prev => Math.max(0, prev - 1));
   };
 
   const resetQuestionnaire = () => {

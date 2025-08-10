@@ -7,60 +7,7 @@ import { generateFinancialReport } from "./services/pdfGenerator";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
-  // Financial session creation endpoint
-  app.post('/api/financial-session', async (req, res) => {
-    try {
-      const formData = req.body;
-      
-      // Create a unique session ID
-      const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Store session data
-      await storage.createFinancialSession(sessionId, formData);
-      
-      res.json({ sessionId });
-    } catch (error) {
-      console.error('Error creating financial session:', error);
-      res.status(500).json({ 
-        error: 'Failed to create financial session',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-
-  // Session analysis endpoint
-  app.post('/api/analyze-session/:sessionId', async (req, res) => {
-    try {
-      const { sessionId } = req.params;
-      
-      // Retrieve session data
-      const sessionData = await storage.getFinancialSession(sessionId);
-      if (!sessionData) {
-        return res.status(404).json({ error: 'Session not found' });
-      }
-
-      // Analyze the financial data
-      const analysis = await analyzeFinancialData(sessionData);
-      const questionnaireId = `questionnaire_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Store the analysis result
-      await storage.storeAnalysis(questionnaireId, analysis);
-      
-      res.json({
-        questionnaireId,
-        sessionId,
-        ...analysis
-      });
-    } catch (error) {
-      console.error('Error analyzing session:', error);
-      res.status(500).json({ 
-        error: 'Failed to analyze financial data',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      });
-    }
-  });
-  
-  // Legacy questionnaire submission endpoint (for backward compatibility)
+  // Submit questionnaire and get analysis
   app.post("/api/questionnaire", async (req, res) => {
     try {
       // Validate questionnaire data

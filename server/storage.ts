@@ -11,26 +11,17 @@ export interface IStorage {
   
   createFinancialAnalysis(analysis: InsertFinancialAnalysis): Promise<FinancialAnalysis>;
   getFinancialAnalysis(questionnaireId: string): Promise<FinancialAnalysis | undefined>;
-  
-  // Session management
-  createFinancialSession(sessionId: string, formData: any): Promise<void>;
-  getFinancialSession(sessionId: string): Promise<any | undefined>;
-  storeAnalysis(questionnaireId: string, analysis: any): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private questionnaires: Map<string, Questionnaire>;
   private financialAnalyses: Map<string, FinancialAnalysis>;
-  private sessions: Map<string, any>; // Financial sessions
-  private analyses: Map<string, any>; // Standalone analyses
 
   constructor() {
     this.users = new Map();
     this.questionnaires = new Map();
     this.financialAnalyses = new Map();
-    this.sessions = new Map();
-    this.analyses = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -81,27 +72,6 @@ export class MemStorage implements IStorage {
     return Array.from(this.financialAnalyses.values()).find(
       (analysis) => analysis.questionnaireId === questionnaireId
     );
-  }
-
-  // Session management methods
-  async createFinancialSession(sessionId: string, formData: any): Promise<void> {
-    this.sessions.set(sessionId, {
-      sessionId,
-      formData,
-      createdAt: new Date(),
-    });
-  }
-
-  async getFinancialSession(sessionId: string): Promise<any | undefined> {
-    return this.sessions.get(sessionId)?.formData;
-  }
-
-  async storeAnalysis(questionnaireId: string, analysis: any): Promise<void> {
-    this.analyses.set(questionnaireId, {
-      questionnaireId,
-      analysis,
-      createdAt: new Date(),
-    });
   }
 }
 

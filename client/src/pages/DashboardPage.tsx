@@ -84,44 +84,39 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
   const needsColors = ['#00F5FF', '#06D6A0', '#10B981', '#059669'];
   const wantsColors = ['#D946EF', '#F59E0B', '#EF4444', '#8B5CF6'];
 
-  // Prepare comparison data with null safety
-  const savings = analysisResult.spendingBreakdown.savings || 0;
-  const entertainment = analysisResult.spendingBreakdown.entertainment || 0;
-  const investments = analysisResult.spendingBreakdown.investments || 0;
-  const timeToGoal = analysisResult.goalTimeline?.timeToGoal || 12;
-  
+  // Prepare comparison data
   const comparisonData = [
     {
       category: "Monthly Savings",
-      before: savings,
-      after: savings * 1.3,
-      impact: savings * 0.3,
+      before: analysisResult.spendingBreakdown.savings,
+      after: analysisResult.spendingBreakdown.savings * 1.3,
+      impact: analysisResult.spendingBreakdown.savings * 0.3,
       unit: "currency" as const,
     },
     {
       category: "Entertainment Spending",
-      before: entertainment,
-      after: entertainment * 0.7,
-      impact: -entertainment * 0.3,
+      before: analysisResult.spendingBreakdown.entertainment,
+      after: analysisResult.spendingBreakdown.entertainment * 0.7,
+      impact: -analysisResult.spendingBreakdown.entertainment * 0.3,
       unit: "currency" as const,
     },
     {
       category: "Investment Allocation",
-      before: investments,
-      after: investments * 1.25,
-      impact: investments * 0.25,
+      before: analysisResult.spendingBreakdown.investments,
+      after: analysisResult.spendingBreakdown.investments * 1.25,
+      impact: analysisResult.spendingBreakdown.investments * 0.25,
       unit: "currency" as const,
     },
     {
       category: "Goal Timeline",
-      before: timeToGoal,
-      after: Math.round(timeToGoal * 0.8),
-      impact: -Math.round(timeToGoal * 0.2),
+      before: analysisResult.goalTimeline.timeToGoal,
+      after: Math.round(analysisResult.goalTimeline.timeToGoal * 0.8),
+      impact: -Math.round(analysisResult.goalTimeline.timeToGoal * 0.2),
       unit: "months" as const,
     },
   ];
 
-  const totalExpenses = Object.values(analysisResult.spendingBreakdown).reduce((sum, val) => sum + (val || 0), 0) - (analysisResult.spendingBreakdown.savings || 0) - (analysisResult.spendingBreakdown.investments || 0);
+  const totalExpenses = Object.values(analysisResult.spendingBreakdown).reduce((sum, val) => sum + val, 0) - analysisResult.spendingBreakdown.savings - analysisResult.spendingBreakdown.investments;
 
   return (
     <div className="min-h-screen relative">
@@ -217,10 +212,10 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
             <Card className="glass-effect border-white/20">
               <CardContent className="p-6">
                 <CashFlowChart
-                  income={totalExpenses + (analysisResult.spendingBreakdown.savings || 0) + (analysisResult.spendingBreakdown.investments || 0)}
+                  income={totalExpenses + analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments}
                   expenses={totalExpenses}
-                  investments={analysisResult.spendingBreakdown.investments || 0}
-                  savings={analysisResult.spendingBreakdown.savings || 0}
+                  investments={analysisResult.spendingBreakdown.investments}
+                  savings={analysisResult.spendingBreakdown.savings}
                 />
               </CardContent>
             </Card>

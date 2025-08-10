@@ -1,94 +1,90 @@
 import { useState, useEffect } from 'react';
-import { sessionStorage, SessionData } from '@/utils/session-storage';
-import { FinancialData } from '@/types/financial';
+
+interface SessionData {
+  sessionId: string;
+  userName: string;
+  startTime: Date;
+  isActive: boolean;
+  questionnaireCompleted: boolean;
+  analysisResult?: any;
+  formData?: any; // Store questionnaire progress
+}
 
 export function useSession() {
   const [session, setSession] = useState<SessionData | null>(null);
 
   // Load session from localStorage on mount
   useEffect(() => {
-    const savedSession = sessionStorage.getSessionData();
-    if (savedSession && sessionStorage.isSessionValid()) {
-      setSession(savedSession);
-    } else if (savedSession) {
-      // Clear expired session
-      sessionStorage.clearSessionData();
+    const savedSession = localStorage.getItem('balancify_session');
+    if (savedSession) {
+      const parsedSession = JSON.parse(savedSession);
+      // Check if session is still valid (within 24 hours)
+      const sessionAge = Date.now() - new Date(parsedSession.startTime).getTime();
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+      
+      if (sessionAge < maxAge && parsedSession.isActive) {
+        setSession({
+          ...parsedSession,
+          startTime: new Date(parsedSession.startTime)
+        });
+      } else {
+        // Clear expired session
+        localStorage.removeItem('balancify_session');
+      }
     }
   }, []);
 
+  // Save session to localStorage whenever it changes
+  useEffect(() => {
+    if (session) {
+      localStorage.setItem('balancify_session', JSON.stringify(session));
+    }
+  }, [session]);
+
   const createSession = (userName: string) => {
-    // Clear any existing session and create fresh one
-    sessionStorage.clearSessionData();
-    const newSession = sessionStorage.initializeSession(userName);
+    // Always create a fresh session when called
+    const newSession: SessionData = {
+      sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      userName,
+      startTime: new Date(),
+      isActive: true,
+      questionnaireCompleted: false
+    };
     setSession(newSession);
     return newSession;
   };
 
-  const updateFormData = (formData: Partial<FinancialData>, currentStep: number) => {
-    sessionStorage.updateFormData(formData, currentStep);
-    const updatedSession = sessionStorage.getSessionData();
-    if (updatedSession) {
+  const updateSession = (updates: Partial<SessionData>) => {
+    if (session) {
+      const updatedSession = { ...session, ...updates };
       setSession(updatedSession);
     }
   };
 
-  const completeSession = (sessionId: string) => {
-    sessionStorage.completeSession(sessionId);
-    const updatedSession = sessionStorage.getSessionData();
-    if (updatedSession) {
-      setSession(updatedSession);
+  const completeSession = () => {
+    if (session) {
+      updateSession({ 
+        isActive: false,
+        questionnaireCompleted: true 
+      });
     }
   };
 
   const endSession = () => {
-    sessionStorage.clearSessionData();
+    localStorage.removeItem('balancify_session');
     setSession(null);
   };
 
   const hasActiveSession = () => {
-    const sessionData = sessionStorage.getSessionData();
-    return sessionData && !sessionData.isCompleted && sessionStorage.isSessionValid();
-  };
-
-  const getSessionData = () => {
-    // Get data directly from localStorage to ensure we have the latest
-    const sessionData = sessionStorage.getSessionData();
-    return sessionData?.formData || {};
-  };
-
-  const getCurrentStep = () => {
-    // Get step directly from localStorage to ensure we have the latest
-    const sessionData = sessionStorage.getSessionData();
-    return sessionData?.currentStep || 0;
-  };
-
-  // Create server session when questionnaire is completed
-  const createServerSession = async (formData: FinancialData): Promise<string> => {
-    const response = await fetch('/api/financial-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create server session');
-    }
-
-    const { sessionId } = await response.json();
-    return sessionId;
+    return session?.isActive && !session?.questionnaireCompleted;
   };
 
   return {
     session,
     createSession,
-    updateFormData,
+    updateSession,
     completeSession,
     endSession,
-    hasActiveSession,
-    getSessionData,
-    getCurrentStep,
-    createServerSession
+    hasActiveSession
   };
 }
