@@ -57,12 +57,17 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   initialData,
   className = ""
 }) => {
+  // Calculate actual current savings as income - total expenses (not using preferred savings)
+  const currentIncome = initialData?.income?.monthly || 100000;
+  const totalExpenses = initialData?.expenses?.total || Object.values(initialData?.spendingBreakdown || {}).reduce((sum, val) => sum + (val || 0), 0) - (initialData?.spendingBreakdown?.savings || 0);
+  const actualCurrentSavings = Math.max(0, currentIncome - totalExpenses);
+  
   const [simulationParams, setSimulationParams] = useState<SimulationParams>({
     incomeIncrease: 0,
     expenseReduction: 0,
     additionalSavings: 0,
     investmentBoost: 0,
-    goalTarget: initialData?.financialGoals?.[0]?.targetAmount || initialData?.spendingBreakdown?.savings * 120 || 1000000
+    goalTarget: initialData?.financialGoals?.[0]?.targetAmount || 1000000
   });
 
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
@@ -144,7 +149,7 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       expenseReduction: 0,
       additionalSavings: 0,
       investmentBoost: 0,
-      goalTarget: initialData?.financialGoals?.[0]?.targetAmount || initialData?.spendingBreakdown?.savings * 120 || 1000000
+      goalTarget: initialData?.financialGoals?.[0]?.targetAmount || 1000000
     });
     setSimulationResult(null);
     setSelectedScenario('custom');
@@ -160,14 +165,12 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   };
 
   const calculatePotentialSavings = () => {
-    const monthlyIncome = initialData?.income?.monthly || 0;
-    const monthlyExpenses = initialData?.expenses?.total || 0;
+    const newIncome = currentIncome * (1 + simulationParams.incomeIncrease / 100);
+    const newExpenses = totalExpenses * (1 - simulationParams.expenseReduction / 100);
+    const additionalMonthlySavings = (simulationParams.additionalSavings / 100) * currentIncome;
+    const boostedInvestments = (initialData?.spendingBreakdown?.investments || 0) * (1 + simulationParams.investmentBoost / 100);
 
-    const newIncome = monthlyIncome * (1 + simulationParams.incomeIncrease / 100);
-    const newExpenses = monthlyExpenses * (1 - simulationParams.expenseReduction / 100);
-    const additionalMonthlySavings = (simulationParams.additionalSavings / 100) * monthlyIncome;
-
-    return newIncome - newExpenses + additionalMonthlySavings;
+    return newIncome - newExpenses + additionalMonthlySavings + boostedInvestments;
   };
 
   useEffect(() => {

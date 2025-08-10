@@ -52,6 +52,8 @@ export function useQuestionnaire() {
         investment_types: data.investment_types || [],
         monthly_investment: data.monthly_investment || 0,
         financial_goals: data.financial_goals || "",
+        target_amount: data.target_amount || 1000000,
+        target_timeline_months: data.target_timeline_months || 36,
         
         // Budgeting Behavior & Mindset
         track_spending: data.track_spending || "No",

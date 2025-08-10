@@ -116,7 +116,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const adjustedData = {
         ...originalData,
         monthly_income: originalData.monthly_income * (1 + simulation.incomeIncrease / 100),
-        preferred_savings: originalData.preferred_savings + (simulation.additionalSavings / 100 * originalData.monthly_income),
         monthly_investment: originalData.monthly_investment * (1 + simulation.investmentBoost / 100),
         // Reduce expenses based on expense reduction percentage
         housing_expenses: originalData.housing_expenses * (1 - simulation.expenseReduction / 100),
@@ -128,9 +127,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Re-analyze with adjusted data
       const simulatedAnalysis = await analyzeFinancialData(adjustedData);
       
-      // Calculate comparison metrics
-      const originalMonthlySavings = originalData.preferred_savings + originalData.monthly_investment;
-      const newMonthlySavings = adjustedData.preferred_savings + adjustedData.monthly_investment;
+      // Calculate comparison metrics using ACTUAL savings (income - expenses), not preferred savings
+      const originalMonthlySavings = originalAnalysis.spendingBreakdown.savings + originalAnalysis.spendingBreakdown.investments;
+      const newMonthlySavings = simulatedAnalysis.spendingBreakdown.savings + simulatedAnalysis.spendingBreakdown.investments;
       const savingsIncrease = newMonthlySavings - originalMonthlySavings;
       const timeToGoalMonths = Math.ceil(simulation.goalTarget / newMonthlySavings);
       

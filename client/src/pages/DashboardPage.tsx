@@ -202,7 +202,7 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
                 income: { monthly: totalExpenses + analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments },
                 expenses: { total: totalExpenses },
                 currentSavings: analysisResult.goalTimeline.currentSavings,
-                financialGoals: analysisResult.financialGoals || [{ targetAmount: 1000000, description: "Emergency Fund" }],
+                financialGoals: analysisResult.financialGoals || [{ targetAmount: analysisResult.goalTimeline.targetAmount, description: "Primary Goal" }],
                 spendingBreakdown: analysisResult.spendingBreakdown
               }}
             />
@@ -212,18 +212,20 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
           <Card className="cosmic-card mb-8">
             <CardContent className="p-8">
               <GoalTimelineChart
-                data={[
-                  { month: "Jan", currentProgress: 50000, projectedProgress: 55000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Feb", currentProgress: 65000, projectedProgress: 70000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Mar", currentProgress: 80000, projectedProgress: 85000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Apr", currentProgress: 95000, projectedProgress: 100000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "May", currentProgress: 110000, projectedProgress: 115000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Jun", currentProgress: 125000, projectedProgress: 130000, simulatedProgress: 0, goalTarget: 1000000 }
-                ]}
-                goalName="Emergency Fund"
-                targetAmount={1000000}
-                currentAmount={50000}
-                projectedDate="2025-12-31"
+                data={analysisResult.goalTimeline.milestones.map((milestone, index) => ({
+                  month: `Month ${milestone.month}`,
+                  currentProgress: milestone.amount,
+                  projectedProgress: milestone.amount + (analysisResult.goalTimeline.monthlyContribution * (index + 1)),
+                  simulatedProgress: 0,
+                  goalTarget: analysisResult.goalTimeline.targetAmount,
+                  milestone: milestone.description
+                }))}
+                goalName={analysisResult.financialGoals?.[0]?.description || "Primary Financial Goal"}
+                targetAmount={analysisResult.goalTimeline.targetAmount}
+                currentAmount={analysisResult.goalTimeline.currentSavings}
+                monthlyContribution={analysisResult.goalTimeline.monthlyContribution}
+                actualSavings={analysisResult.spendingBreakdown.savings}
+                projectedDate={`${new Date().getFullYear() + Math.ceil(analysisResult.goalTimeline.timeToGoal / 12)}-12-31`}
               />
             </CardContent>
           </Card>

@@ -68,7 +68,9 @@ const questions: Question[] = [
     fields: [
       { type: "checkbox", label: "Investment Types", id: "investment_types", options: ["Fixed Deposits", "Stocks", "Mutual Funds", "Crypto", "Gold"] },
       { type: "number", label: "Monthly Investment Amount (₹)", id: "monthly_investment", placeholder: "5000" },
-      { type: "textarea", label: "Long-term Financial Goals", id: "financial_goals", placeholder: "House purchase, retirement planning..." }
+      { type: "textarea", label: "Long-term Financial Goals", id: "financial_goals", placeholder: "House purchase, retirement planning..." },
+      { type: "number", label: "Primary Goal Target Amount (₹)", id: "target_amount", placeholder: "1000000" },
+      { type: "number", label: "Timeline to Achieve (Months)", id: "target_timeline_months", placeholder: "36" }
     ]
   },
   {

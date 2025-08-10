@@ -116,28 +116,33 @@ export async function analyzeFinancialData(data: QuestionnaireData): Promise<{
 function calculateSpendingBreakdown(data: QuestionnaireData): SpendingBreakdown {
   const monthlyGroceries = data.groceries_weekly * 4;
   const loanPayment = data.has_loans === "Yes" ? (data.loan_repayment || 0) : 0;
+  const entertainment = calculateEntertainmentCost(data);
+  
+  // Calculate total expenses first
+  const totalExpenses = 
+    data.housing_expenses + data.utility_bills +
+    monthlyGroceries + data.dining_monthly +
+    data.transport_monthly +
+    entertainment +
+    data.shopping_monthly +
+    data.subscription_cost +
+    loanPayment +
+    data.monthly_investment;
+  
+  // Calculate actual savings as income - total expenses
+  const actualSavings = Math.max(0, data.monthly_income - totalExpenses);
   
   return {
     housing: data.housing_expenses + data.utility_bills,
     food: monthlyGroceries + data.dining_monthly,
     transportation: data.transport_monthly,
-    entertainment: calculateEntertainmentCost(data),
+    entertainment: entertainment,
     shopping: data.shopping_monthly,
     subscriptions: data.subscription_cost,
     loans: loanPayment,
     investments: data.monthly_investment,
-    savings: data.preferred_savings,
-    other: Math.max(0, data.monthly_income - (
-      data.housing_expenses + data.utility_bills +
-      monthlyGroceries + data.dining_monthly +
-      data.transport_monthly +
-      calculateEntertainmentCost(data) +
-      data.shopping_monthly +
-      data.subscription_cost +
-      loanPayment +
-      data.monthly_investment +
-      data.preferred_savings
-    ))
+    savings: actualSavings, // Use actual savings, not preferred savings
+    other: 0 // Since we calculated actual savings, other should be 0
   };
 }
 
@@ -236,26 +241,25 @@ function parseFinancialGoals(financialGoalsText: string, monthlyIncome: number):
 }
 
 function calculateGoalTimeline(data: QuestionnaireData, spending: SpendingBreakdown): GoalTimeline {
-  const totalExpenses = Object.values(spending).reduce((sum, val) => sum + val, 0) - spending.savings;
-  const monthlySavings = data.monthly_investment + data.preferred_savings;
-  const targetAmount = data.preferred_savings * 120; // Assume 10-year goal
-  
-  const timeToGoal = Math.ceil(targetAmount / monthlySavings);
+  const targetAmount = data.target_amount; // Use actual target from questionnaire
+  const monthlyContribution = spending.savings + spending.investments; // Use actual savings + investments
+  const timeToGoal = Math.ceil(targetAmount / Math.max(monthlyContribution, 1000));
   
   const milestones = [];
-  for (let i = 1; i <= Math.min(timeToGoal, 60); i += 12) {
+  const timelineMonths = Math.min(data.target_timeline_months, timeToGoal, 120);
+  for (let month = 6; month <= timelineMonths; month += 6) {
     milestones.push({
-      month: i,
-      amount: monthlySavings * i,
-      description: `Year ${Math.ceil(i/12)} milestone`,
+      month,
+      amount: Math.round(monthlyContribution * month),
+      description: `${month} month milestone`,
     });
   }
   
   return {
     currentSavings: 0, // Assuming starting fresh
-    targetAmount,
-    monthlyContribution: monthlySavings,
-    timeToGoal,
+    targetAmount: data.target_amount,
+    monthlyContribution,
+    timeToGoal: Math.min(timeToGoal, data.target_timeline_months),
     milestones,
   };
 }
