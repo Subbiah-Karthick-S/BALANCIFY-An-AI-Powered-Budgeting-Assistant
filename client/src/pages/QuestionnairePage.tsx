@@ -114,27 +114,17 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  // Initialize session data on first mount only
-  useEffect(() => {
-    if (session?.userName && !formData?.name) {
-      updateFormData({ name: session.userName });
-    }
-  }, [session?.userName, updateFormData]);
-
-  // Save form data to session when it changes
-  useEffect(() => {
-    if (formData?.name && formData.name.length > 0 && session?.userName === formData.name) {
-      updateSession({ formData });
-    }
-  }, [formData, session?.userName, updateSession]);
-
-  // Create session when user first enters their name
+  // Simple form change handler without complex session logic
   const handleFormChange = (newData: Partial<FinancialData>) => {
     updateFormData(newData);
     
-    // Create session when name is entered for the first time
-    if (newData.name && newData.name.length > 0 && !session) {
-      createSession(newData.name);
+    // Create/update session only when user enters a real name (length > 1)
+    if (newData.name && newData.name.length > 1) {
+      if (!session) {
+        createSession(newData.name);
+      } else if (session.userName !== newData.name) {
+        createSession(newData.name);
+      }
     }
   };
 

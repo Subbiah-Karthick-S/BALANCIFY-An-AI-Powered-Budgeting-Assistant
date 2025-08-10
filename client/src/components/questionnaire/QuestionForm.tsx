@@ -50,7 +50,9 @@ export function QuestionForm({
   };
 
   const renderField = (field: QuestionField) => {
-    const value = formValues[field.id] !== undefined ? formValues[field.id] : (field.defaultValue || '');
+    // Get the actual value from formValues, don't use defaultValue for text fields
+    const value = formValues[field.id] !== undefined ? formValues[field.id] : 
+                  (field.type === 'text' ? '' : (field.defaultValue || ''));
 
     // Handle conditional fields
     if (field.condition) {
