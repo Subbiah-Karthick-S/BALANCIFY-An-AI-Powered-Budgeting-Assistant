@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useSession } from '@/hooks/useSession';
 import { useToast } from '@/hooks/use-toast';
+import { getSessionData, clearSessionData, hasSessionData } from '@/utils/session-storage';
 import { Rocket, Sparkles, Brain, TrendingUp, Shield, Zap, ChevronRight, Star, Globe, RefreshCw, Trash2 } from 'lucide-react';
 
 interface HomePageProps {
@@ -13,7 +13,7 @@ interface HomePageProps {
 const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
   const [currentFeature, setCurrentFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
-  const { session, hasActiveSession, endSession } = useSession();
+  const [sessionData, setSessionData] = useState(getSessionData());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -25,23 +25,22 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
   }, []);
 
   const handleContinueSession = () => {
-    if (hasActiveSession()) {
+    if (sessionData) {
       toast({
         title: "Session Restored",
-        description: `Welcome back! Continuing your questionnaire from step ${(session?.currentStep || 0) + 1}.`,
+        description: `Welcome back! Continuing your questionnaire from step ${sessionData.currentStep + 1}.`,
       });
       onStartMission?.();
     }
   };
 
   const handleEndSession = () => {
-    if (hasActiveSession()) {
-      endSession();
-      toast({
-        title: "Session Ended",
-        description: "Your previous session has been cleared. You can start fresh now.",
-      });
-    }
+    clearSessionData();
+    setSessionData(null);
+    toast({
+      title: "Session Ended",
+      description: "Your previous session has been cleared. You can start fresh now.",
+    });
   };
 
   const features = [
@@ -128,7 +127,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
           </p>
 
           {/* Session Recovery Section */}
-          {hasActiveSession() && (
+          {sessionData && (
             <Card className="mb-8 mx-auto max-w-2xl bg-gradient-to-r from-cyan-500/10 to-purple-500/10 border-cyan-500/30 backdrop-blur-sm">
               <CardContent className="p-6 text-center">
                 <div className="flex items-center justify-center gap-2 mb-4">
@@ -136,7 +135,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
                   <h3 className="text-lg font-semibold text-neon-cyan">Session Recovery Available</h3>
                 </div>
                 <p className="text-gray-300 mb-4">
-                  Found an active session from {session?.userName}. You can continue from step {(session?.currentStep || 0) + 1} 
+                  Found an active session from {sessionData?.userName || 'your previous session'}. You can continue from step {(sessionData?.currentStep || 0) + 1} 
                   or start fresh.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -167,7 +166,7 @@ const HomePage: React.FC<HomePageProps> = ({ onStartMission }) => {
               className="cosmic-button px-10 py-4 text-lg font-semibold group relative overflow-hidden"
             >
               <Rocket className="w-6 h-6 mr-2 group-hover:rotate-12 transition-transform" />
-              {hasActiveSession() ? 'Start New Analysis' : 'Launch Financial Analysis'}
+              {sessionData ? 'Start New Analysis' : 'Launch Financial Analysis'}
               <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
             <Button 

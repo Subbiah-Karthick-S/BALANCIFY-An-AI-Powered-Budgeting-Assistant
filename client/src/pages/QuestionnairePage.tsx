@@ -71,7 +71,7 @@ const questions: Question[] = [
     fields: [
       { type: "checkbox", label: "Investment Types", id: "investment_types", options: ["Fixed Deposits", "Stocks", "Mutual Funds", "Crypto", "Gold"] },
       { type: "number", label: "Monthly Investment Amount (₹)", id: "monthly_investment", placeholder: "5000" },
-      { type: "goal-builder", label: "Financial Goals", id: "financial_goals" }
+      { type: "text", label: "Financial Goals", id: "financial_goals" }
     ]
   },
   {
@@ -98,7 +98,6 @@ interface QuestionnairePageProps {
 }
 
 export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
-  const { session, createSession, updateSession, hasActiveSession } = useSession();
   const { toast } = useToast();
   const {
     currentStep,
@@ -107,37 +106,29 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
     nextStep,
     prevStep,
     submitQuestionnaire,
-    loadFormDataFromSession,
     isSubmitting,
     analysisResult,
     error,
+    sessionRestored,
+    hasSession
   } = useQuestionnaire();
 
   // Show session recovery notification on first render
   useEffect(() => {
-    if (hasActiveSession() && session?.formData) {
+    if (sessionRestored) {
       toast({
         title: "Session Restored",
-        description: `Welcome back! Your progress has been restored from step ${(session?.currentStep || 0) + 1}.`,
+        description: `Welcome back! Your progress has been restored from step ${currentStep + 1}.`,
       });
     }
-  }, []); // Only run once on mount
+  }, [sessionRestored, currentStep, toast]);
 
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  // Simple form change handler without complex session logic
+  // Simple form change handler that automatically saves to localStorage
   const handleFormChange = (newData: Partial<FinancialData>) => {
     updateFormData(newData);
-    
-    // Create/update session only when user enters a real name (length > 1)
-    if (newData.name && newData.name.length > 1) {
-      if (!session) {
-        createSession(newData.name);
-      } else if (session.userName !== newData.name) {
-        createSession(newData.name);
-      }
-    }
   };
 
   const handleNext = () => {
