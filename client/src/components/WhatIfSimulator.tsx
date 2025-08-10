@@ -166,12 +166,25 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   };
 
   const calculatePotentialSavings = () => {
-    const newIncome = currentIncome * (1 + simulationParams.incomeIncrease / 100);
-    const newExpenses = totalExpenses * (1 - simulationParams.expenseReduction / 100);
+    // Calculate the increased income from raise/promotion
+    const incomeIncrease = currentIncome * (simulationParams.incomeIncrease / 100);
+    const newIncome = currentIncome + incomeIncrease;
+    
+    // Calculate reduced expenses
+    const expenseReduction = totalExpenses * (simulationParams.expenseReduction / 100);
+    const newExpenses = totalExpenses - expenseReduction;
+    
+    // Calculate additional savings (separate from income/expense changes)
     const additionalMonthlySavings = (simulationParams.additionalSavings / 100) * currentIncome;
-    const boostedInvestments = (initialData?.spendingBreakdown?.investments || 0) * (1 + simulationParams.investmentBoost / 100);
-
-    return newIncome - newExpenses + additionalMonthlySavings + boostedInvestments;
+    
+    // Calculate investment boost on existing investments
+    const currentInvestments = initialData?.spendingBreakdown?.investments || 0;
+    const investmentBoost = currentInvestments * (simulationParams.investmentBoost / 100);
+    
+    // Total potential monthly savings = new savings capability + additional efforts + investment boost
+    const totalPotentialSavings = (newIncome - newExpenses) + additionalMonthlySavings + investmentBoost;
+    
+    return Math.max(0, totalPotentialSavings);
   };
 
   useEffect(() => {
