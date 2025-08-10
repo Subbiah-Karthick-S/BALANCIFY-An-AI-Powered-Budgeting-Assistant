@@ -122,7 +122,7 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
 
   // Load saved session data into form if exists
   useEffect(() => {
-    if (session && session.userName && !formData?.name) {
+    if (session && session.userName && (!formData?.name || formData.name === "")) {
       updateFormData({ name: session.userName });
     }
   }, [session, formData?.name, updateFormData]);

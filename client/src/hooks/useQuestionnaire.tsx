@@ -5,7 +5,9 @@ import { FinancialData, AnalysisResult } from '@/types/financial';
 
 export function useQuestionnaire() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [formData, setFormData] = useState<Partial<FinancialData>>({});
+  const [formData, setFormData] = useState<Partial<FinancialData>>({
+    name: "" // Initialize with empty string instead of undefined
+  });
 
   const submitQuestionnaire = useMutation({
     mutationFn: async (data: FinancialData): Promise<AnalysisResult> => {
