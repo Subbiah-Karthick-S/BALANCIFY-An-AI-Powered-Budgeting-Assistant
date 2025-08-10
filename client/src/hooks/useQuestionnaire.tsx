@@ -21,7 +21,7 @@ export function useQuestionnaire() {
         housing_status: data.housing_status || "Rent",
         housing_expenses: data.housing_expenses || 0,
         utility_bills: data.utility_bills || 0,
-        household_size: data.household_size || 1,
+        household_size: Math.max(1, data.household_size || 1),
         
         // Food & Dining
         groceries_weekly: data.groceries_weekly || 0,

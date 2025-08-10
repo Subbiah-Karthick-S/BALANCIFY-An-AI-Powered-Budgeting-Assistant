@@ -49,7 +49,7 @@ export function QuestionForm({
   };
 
   const renderField = (field: QuestionField) => {
-    const value = formValues[field.id] || '';
+    const value = formValues[field.id] !== undefined ? formValues[field.id] : (field.defaultValue || '');
 
     // Handle conditional fields
     if (field.condition) {
@@ -69,7 +69,15 @@ export function QuestionForm({
               type="number"
               placeholder={field.placeholder}
               value={value}
-              onChange={(e) => handleFieldChange(field.id, parseFloat(e.target.value) || 0)}
+              onChange={(e) => {
+                const numValue = parseFloat(e.target.value);
+                // For household_size, ensure minimum value of 1
+                if (field.id === 'household_size') {
+                  handleFieldChange(field.id, Math.max(1, numValue || 1));
+                } else {
+                  handleFieldChange(field.id, numValue || 0);
+                }
+              }}
               className="bg-gray-800/50 border-gray-600 focus:border-neon-cyan focus:ring-neon-cyan text-white"
             />
           </div>

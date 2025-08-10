@@ -32,7 +32,7 @@ export const questions: Question[] = [
       { type: "radio", label: "Housing Status", id: "housing_status", options: ["Rent", "Own", "Living with family"] },
       { type: "number", label: "Monthly Housing Expenses (₹)", id: "housing_expenses", placeholder: "15000" },
       { type: "range", label: "Utility Bills (Monthly ₹)", id: "utility_bills", min: 0, max: 10000, step: 500 },
-      { type: "number", label: "Number of People in Home", id: "household_size", placeholder: "3" }
+      { type: "number", label: "Number of People in Home", id: "household_size", placeholder: "3", defaultValue: 1 }
     ]
   },
   {
