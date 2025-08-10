@@ -59,9 +59,17 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   className = ""
 }) => {
   // Calculate actual current savings as income - total expenses (not using preferred savings)
-  const currentIncome = initialData?.income?.monthly || 100000;
+  const currentIncome = initialData?.income?.monthly || 50000;
   const totalExpenses = initialData?.expenses?.total || Object.values(initialData?.spendingBreakdown || {}).reduce((sum, val) => sum + (val || 0), 0) - (initialData?.spendingBreakdown?.savings || 0);
   const actualCurrentSavings = Math.max(0, currentIncome - totalExpenses);
+  
+  // Debug logging
+  console.log('WhatIf Simulator Debug:', {
+    currentIncome,
+    totalExpenses, 
+    actualCurrentSavings,
+    initialData: initialData
+  });
   
   const [simulationParams, setSimulationParams] = useState<SimulationParams>({
     incomeIncrease: 0,
