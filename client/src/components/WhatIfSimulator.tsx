@@ -370,14 +370,14 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                     <div className="bg-aurora-green/20 text-aurora-green border border-aurora-green px-2 py-1 rounded text-xs font-semibold mb-2 inline-block">
                       Goal Achievability
                     </div>
-                    <p className="text-gray-300 text-sm">{simulationResult.insights.goalAchievability}</p>
+                    <p className="text-gray-300 text-sm">{simulationResult.insights.goalAchievability || 'Analysis in progress...'}</p>
                   </div>
                   
                   <div>
                     <div className="bg-neon-cyan/20 text-neon-cyan border border-neon-cyan px-2 py-1 rounded text-xs font-semibold mb-2 inline-block">
                       Timeline
                     </div>
-                    <p className="text-gray-300 text-sm">{simulationResult.insights.timeToGoal}</p>
+                    <p className="text-gray-300 text-sm">{simulationResult.insights.timeToGoal || 'Calculating timeline...'}</p>
                   </div>
                 </div>
                 
@@ -386,7 +386,7 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                     <div className="bg-cosmic-purple/20 text-cosmic-purple border border-cosmic-purple px-2 py-1 rounded text-xs font-semibold mb-2 inline-block">
                       Savings Impact
                     </div>
-                    <p className="text-gray-300 text-sm">{simulationResult.insights.savingsImpact}</p>
+                    <p className="text-gray-300 text-sm">{simulationResult.insights.savingsImpact || 'Analyzing impact...'}</p>
                   </div>
                   
                   <div>
@@ -394,7 +394,7 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
                       Recommendations
                     </div>
                     <ul className="space-y-1">
-                      {simulationResult.insights.recommendations.map((rec, index) => (
+                      {(simulationResult.insights.recommendations || []).map((rec, index) => (
                         <li key={index} className="text-gray-300 text-sm flex items-start gap-2">
                           <CheckCircle className="w-3 h-3 text-aurora-green mt-0.5 flex-shrink-0" />
                           {rec}
@@ -408,23 +408,27 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
           </Card>
 
           {/* Live Transformation Chart */}
-          <LiveTransformationChart
-            data={simulationResult.projections.monthlyData}
-            title="Financial Transformation Analysis"
-            scenario={selectedScenario}
-            isLive={isSimulating}
-          />
+          {simulationResult.projections?.monthlyData && (
+            <LiveTransformationChart
+              data={simulationResult.projections.monthlyData}
+              title="Financial Transformation Analysis"
+              scenario={selectedScenario}
+              isLive={isSimulating}
+            />
+          )}
 
           {/* Goal Timeline Chart */}
-          <GoalTimelineChart
-            data={simulationResult.projections.goalTimeline}
-            goalName={initialData?.financialGoals?.[0]?.description || "Financial Goal"}
-            targetAmount={simulationParams.goalTarget}
-            currentAmount={initialData?.currentSavings || 0}
-            projectedDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()}
-            simulatedDate={simulationResult.insights.timeToGoal}
-            isSimulating={isSimulating}
-          />
+          {simulationResult.projections?.goalTimeline && (
+            <GoalTimelineChart
+              data={simulationResult.projections.goalTimeline}
+              goalName={initialData?.financialGoals?.[0]?.description || "Financial Goal"}
+              targetAmount={simulationParams.goalTarget}
+              currentAmount={initialData?.currentSavings || 0}
+              projectedDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()}
+              simulatedDate={simulationResult.insights?.timeToGoal || 'Calculating...'}
+              isSimulating={isSimulating}
+            />
+          )}
         </div>
       )}
 
