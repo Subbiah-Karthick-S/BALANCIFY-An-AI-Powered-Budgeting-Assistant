@@ -1,0 +1,395 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Advanced cosmic color palette */
+  --background: linear-gradient(135deg, hsl(230, 40%, 4%) 0%, hsl(235, 35%, 8%) 50%, hsl(240, 30%, 6%) 100%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: linear-gradient(145deg, hsl(235, 35%, 7%) 0%, hsl(240, 30%, 12%) 100%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(235, 35%, 7%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(188, 100%, 50%);
+  --primary-foreground: hsl(230, 40%, 4%);
+  --secondary: hsl(285, 100%, 65%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(235, 25%, 15%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --accent: hsl(273, 100%, 75%);
+  --accent-foreground: hsl(230, 40%, 4%);
+  --destructive: hsl(0, 85%, 60%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(235, 25%, 18%);
+  --input: hsl(235, 25%, 15%);
+  --ring: hsl(188, 100%, 50%);
+  --radius: 0.75rem;
+  
+  /* Advanced cosmic colors */
+  --neon-cyan: #00F5FF;
+  --cosmic-purple: #8B5CF6;
+  --nebula-pink: #FF1493;
+  --space-blue: #4169E1;
+  --galaxy-violet: #9932CC;
+  --stellar-gold: #FFD700;
+  --aurora-green: #00FF7F;
+  --plasma-orange: #FF4500;
+  --quantum-blue: #0080FF;
+  --astral-white: #F8F8FF;
+  
+  /* Gradients */
+  --cosmic-gradient: linear-gradient(135deg, var(--neon-cyan) 0%, var(--cosmic-purple) 50%, var(--nebula-pink) 100%);
+  --nebula-gradient: linear-gradient(45deg, var(--space-blue) 0%, var(--galaxy-violet) 50%, var(--cosmic-purple) 100%);
+  --aurora-gradient: linear-gradient(90deg, var(--aurora-green) 0%, var(--neon-cyan) 50%, var(--quantum-blue) 100%);
+  
+  /* Typography */
+  --font-orbitron: 'Orbitron', monospace;
+  --font-space: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+.dark {
+  --background: linear-gradient(135deg, hsl(230, 40%, 4%) 0%, hsl(235, 35%, 8%) 50%, hsl(240, 30%, 6%) 100%);
+  --foreground: hsl(0, 0%, 98%);
+  --card: linear-gradient(145deg, hsl(235, 35%, 7%) 0%, hsl(240, 30%, 12%) 100%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --popover: hsl(235, 35%, 7%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --primary: hsl(188, 100%, 50%);
+  --primary-foreground: hsl(230, 40%, 4%);
+  --secondary: hsl(285, 100%, 65%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --muted: hsl(235, 25%, 15%);
+  --muted-foreground: hsl(0, 0%, 65%);
+  --accent: hsl(273, 100%, 75%);
+  --accent-foreground: hsl(230, 40%, 4%);
+  --destructive: hsl(0, 85%, 60%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --border: hsl(235, 25%, 18%);
+  --input: hsl(235, 25%, 15%);
+  --ring: hsl(188, 100%, 50%);
+}
+
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-space);
+  background: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Cosmic background effects */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Starfield animation */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.4), transparent),
+    radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.8), transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  animation: starfield 20s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+@keyframes starfield {
+  from { transform: translateY(0px); }
+  to { transform: translateY(-100px); }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(235, 25%, 15%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-cyan), var(--cosmic-purple));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--cosmic-purple), var(--neon-cyan));
+}
+
+/* Typography classes */
+.font-orbitron {
+  font-family: var(--font-orbitron);
+}
+
+.font-space {
+  font-family: var(--font-space);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Neon text effects */
+.text-neon {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan), 0 0 15px var(--neon-cyan);
+}
+
+.text-neon-purple {
+  color: var(--cosmic-purple);
+  text-shadow: 0 0 5px var(--cosmic-purple), 0 0 10px var(--cosmic-purple), 0 0 15px var(--cosmic-purple);
+}
+
+.text-neon-pink {
+  color: var(--nebula-pink);
+  text-shadow: 0 0 5px var(--nebula-pink), 0 0 10px var(--nebula-pink), 0 0 15px var(--nebula-pink);
+}
+
+/* Gradient text */
+.text-cosmic-gradient {
+  background: var(--cosmic-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-nebula-gradient {
+  background: var(--nebula-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-aurora-gradient {
+  background: var(--aurora-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Card enhancements */
+.cosmic-card {
+  background: var(--card);
+  border: 1px solid hsl(235, 25%, 20%);
+  border-radius: var(--radius);
+  box-shadow: 
+    0 4px 20px rgba(0, 245, 255, 0.1),
+    0 8px 32px rgba(139, 92, 246, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+  opacity: 0.6;
+}
+
+/* Button enhancements */
+.cosmic-button {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--cosmic-purple));
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.cosmic-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.cosmic-button:hover::before {
+  left: 100%;
+}
+
+.cosmic-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 245, 255, 0.4);
+}
+
+/* Input enhancements */
+.cosmic-input {
+  background: hsl(235, 25%, 15%);
+  border: 1px solid hsl(235, 25%, 20%);
+  border-radius: var(--radius);
+  color: var(--foreground);
+  transition: all 0.3s ease;
+}
+
+.cosmic-input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.2);
+  background: hsl(235, 25%, 18%);
+}
+
+/* Animation classes */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-pulse-neon {
+  animation: pulse-neon 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-neon {
+  from { 
+    text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor; 
+  }
+  to { 
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; 
+  }
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { 
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+  }
+  to { 
+    box-shadow: 0 0 40px rgba(0, 245, 255, 0.6), 0 0 60px rgba(139, 92, 246, 0.3);
+  }
+}
+
+/* 3D transform utilities */
+.transform-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.rotate-y-hover:hover {
+  transform: rotateY(10deg);
+  transition: transform 0.3s ease;
+}
+
+.scale-hover:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+/* Loading animations */
+.cosmic-loader {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--neon-cyan), var(--cosmic-purple), var(--nebula-pink), var(--neon-cyan));
+  animation: spin 1s linear infinite;
+}
+
+.cosmic-loader::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: 50%;
+  background: var(--background);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Chart enhancements */
+.recharts-wrapper {
+  font-family: var(--font-space);
+}
+
+.recharts-tooltip-wrapper {
+  font-family: var(--font-space);
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .cosmic-card {
+    margin: 0.5rem;
+  }
+  
+  body::after {
+    background-size: 100px 50px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --neon-cyan: #ffffff;
+    --cosmic-purple: #ffffff;
+    --nebula-pink: #ffffff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  body::after {
+    animation: none;
+  }
+}
