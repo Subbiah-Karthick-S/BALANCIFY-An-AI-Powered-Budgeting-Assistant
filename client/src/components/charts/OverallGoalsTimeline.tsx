@@ -3,8 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Target, Clock, Users, TrendingUp, PieChart as PieChartIcon, Zap } from 'lucide-react';
-import WhatIfSimulator from '../WhatIfSimulator';
+import { Target, Clock, Users, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
 
 interface FinancialGoal {
   id: string;
@@ -27,7 +26,6 @@ const OverallGoalsTimeline: React.FC<OverallGoalsTimelineProps> = ({
   className = ""
 }) => {
   const [showPieChart, setShowPieChart] = useState(false);
-  const [showWhatIf, setShowWhatIf] = useState(false);
   const categoryColors = {
     emergency: '#ef4444',
     investment: '#8b5cf6',
@@ -283,24 +281,15 @@ const OverallGoalsTimeline: React.FC<OverallGoalsTimelineProps> = ({
             </div>
           </div>
 
-          {/* Pie Chart and What If Controls */}
-          <div className="flex gap-3 pt-4 border-t border-gray-700">
+          {/* Pie Chart Control */}
+          <div className="pt-4 border-t border-gray-700">
             <Button
               onClick={() => setShowPieChart(!showPieChart)}
               variant="outline"
-              className="flex-1 cosmic-button border-stellar-gold text-stellar-gold hover:bg-stellar-gold/10"
+              className="w-full cosmic-button border-stellar-gold text-stellar-gold hover:bg-stellar-gold/10"
             >
               <PieChartIcon className="w-4 h-4 mr-2" />
               {showPieChart ? 'Hide' : 'Show'} Goals Distribution
-            </Button>
-            
-            <Button
-              onClick={() => setShowWhatIf(!showWhatIf)}
-              variant="outline"
-              className="flex-1 cosmic-button border-neon-cyan text-neon-cyan hover:bg-neon-cyan/10"
-            >
-              <Zap className="w-4 h-4 mr-2" />
-              {showWhatIf ? 'Hide' : 'Show'} Overall What If
             </Button>
           </div>
 
@@ -389,32 +378,7 @@ const OverallGoalsTimeline: React.FC<OverallGoalsTimelineProps> = ({
             </div>
           )}
 
-          {/* Overall What If Simulator */}
-          {showWhatIf && (
-            <div className="mt-6 pt-6 border-t border-gray-700">
-              <WhatIfSimulator
-                questionnaireId={`overall-goals-${Date.now()}`}
-                initialData={{
-                  income: { monthly: monthlySavings * 2 },
-                  expenses: { total: monthlySavings },
-                  currentSavings: goals.reduce((sum, goal) => sum + goal.currentAmount, 0),
-                  financialGoals: goals,
-                  spendingBreakdown: {
-                    savings: monthlySavings * 0.6,
-                    investments: monthlySavings * 0.4,
-                    housing: monthlySavings * 1.2,
-                    food: monthlySavings * 0.8,
-                    transportation: monthlySavings * 0.4,
-                    entertainment: monthlySavings * 0.3,
-                    utilities: monthlySavings * 0.2,
-                    healthcare: monthlySavings * 0.1,
-                    other: monthlySavings * 0.1
-                  }
-                }}
-                className="bg-gray-800/50 rounded-lg p-6"
-              />
-            </div>
-          )}
+
         </CardContent>
       </Card>
     </div>

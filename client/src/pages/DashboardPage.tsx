@@ -11,7 +11,7 @@ import { AIInsights } from '@/components/dashboard/AIInsights';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import { ComparisonTable } from '@/components/dashboard/ComparisonTable';
 import { AnalysisResult } from '@/types/financial';
-import { Download, RotateCcw, LogOut, Target, Home } from 'lucide-react';
+import { Download, RotateCcw, LogOut, Target, Home, Zap } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import IndividualGoalChart from '@/components/charts/IndividualGoalChart';
@@ -314,6 +314,31 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
           <div className="mb-8">
             <ComparisonTable data={comparisonData} />
           </div>
+
+          {/* What If Simulation */}
+          <Card className="cosmic-card mb-8">
+            <CardHeader>
+              <CardTitle className="font-orbitron text-2xl text-cosmic-gradient flex items-center gap-3">
+                <Zap className="w-6 h-6 text-stellar-gold" />
+                What If Financial Simulation
+              </CardTitle>
+              <p className="text-gray-400">
+                Explore how different financial decisions could impact your overall goals
+              </p>
+            </CardHeader>
+            <CardContent className="p-8">
+              <WhatIfSimulator
+                questionnaireId={analysisResult.questionnaireId || `session-${Date.now()}`}
+                initialData={{
+                  income: { monthly: analysisResult.income.monthly },
+                  expenses: { total: analysisResult.expenses.total },
+                  currentSavings: analysisResult.goalTimeline.currentSavings,
+                  financialGoals: analysisResult.financialGoals || [],
+                  spendingBreakdown: analysisResult.spendingBreakdown
+                }}
+              />
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
           <div className="flex justify-center space-x-6">

@@ -435,17 +435,30 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
             />
           )}
 
-          {/* Goal Timeline Chart */}
+          {/* Current vs Optimized Comparison Chart */}
           {simulationResult.projections?.goalTimeline && (
-            <GoalTimelineChart
-              data={simulationResult.projections.goalTimeline}
-              goalName={initialData?.financialGoals?.[0]?.description || "Financial Goal"}
-              targetAmount={simulationParams.goalTarget}
-              currentAmount={initialData?.currentSavings || 0}
-              projectedDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()}
+            <Card className="cosmic-card">
+              <CardHeader>
+                <CardTitle className="font-orbitron text-lg text-stellar-gold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Current vs Optimized Target Progress
+                </CardTitle>
+                <p className="text-sm text-gray-400">
+                  Compare your current trajectory with the optimized financial plan
+                </p>
+              </CardHeader>
+              <CardContent>
+                <GoalTimelineChart
+                  data={simulationResult.projections.goalTimeline}
+                  goalName="Current vs Optimized Progress"
+                  targetAmount={simulationParams.goalTarget}
+                  currentAmount={initialData?.currentSavings || 0}
+                  projectedDate={new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString()}
               simulatedDate={simulationResult.insights?.timeToGoal || 'Calculating...'}
               isSimulating={isSimulating}
-            />
+                />
+              </CardContent>
+            </Card>
           )}
 
           {/* Transformation Analysis */}

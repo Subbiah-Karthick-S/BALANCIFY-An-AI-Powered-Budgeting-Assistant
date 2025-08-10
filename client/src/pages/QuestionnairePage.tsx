@@ -115,10 +115,17 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
 
   // Initialize session with user name when they first enter it
   useEffect(() => {
-    if (formData.name && !session?.userName) {
+    if (formData?.name && !session?.userName) {
       createSession(formData.name);
     }
-  }, [formData.name, session, createSession]);
+  }, [formData?.name, session, createSession]);
+
+  // Load saved session data into form if exists
+  useEffect(() => {
+    if (session && session.userName && !formData?.name) {
+      updateFormData({ name: session.userName });
+    }
+  }, [session, formData?.name, updateFormData]);
 
   const handleNext = () => {
     if (currentStep === questions.length - 1) {

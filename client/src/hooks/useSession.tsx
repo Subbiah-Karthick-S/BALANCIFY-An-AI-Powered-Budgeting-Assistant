@@ -41,6 +41,11 @@ export function useSession() {
   }, [session]);
 
   const createSession = (userName: string) => {
+    // Don't create new session if one already exists with same user
+    if (session && session.userName === userName && session.isActive) {
+      return session;
+    }
+
     const newSession: SessionData = {
       sessionId: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       userName,

@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Target, Clock, TrendingUp, DollarSign, Star, Zap } from 'lucide-react';
-import WhatIfSimulator from '../WhatIfSimulator';
+import { Target, Clock, TrendingUp, DollarSign, Star } from 'lucide-react';
 
 interface FinancialGoal {
   id: string;
@@ -29,7 +28,6 @@ const IndividualGoalChart: React.FC<IndividualGoalChartProps> = ({
   goalIndex,
   className = ""
 }) => {
-  const [showWhatIf, setShowWhatIf] = useState(false);
   const priorityColors = {
     high: '#ef4444',
     medium: '#f59e0b',
@@ -262,44 +260,7 @@ const IndividualGoalChart: React.FC<IndividualGoalChartProps> = ({
           </div>
         )}
 
-        {/* What If Simulator Toggle */}
-        <div className="pt-4 border-t border-gray-700">
-          <Button
-            onClick={() => setShowWhatIf(!showWhatIf)}
-            variant="outline"
-            className="w-full cosmic-button border-neon-cyan text-neon-cyan hover:bg-neon-cyan/10"
-          >
-            <Zap className="w-4 h-4 mr-2" />
-            {showWhatIf ? 'Hide' : 'Show'} What If Analysis
-          </Button>
-        </div>
 
-        {/* What If Simulator */}
-        {showWhatIf && (
-          <div className="mt-6">
-            <WhatIfSimulator
-              questionnaireId={`individual-goal-${goal.id || goalIndex}`}
-              initialData={{
-                income: { monthly: monthlySavings * 2 }, // Estimated total income
-                expenses: { total: monthlySavings }, // Estimated expenses
-                currentSavings: goal.currentAmount,
-                financialGoals: [goal],
-                spendingBreakdown: {
-                  savings: monthlySavings * 0.6,
-                  investments: monthlySavings * 0.4,
-                  housing: monthlySavings * 1.2,
-                  food: monthlySavings * 0.8,
-                  transportation: monthlySavings * 0.4,
-                  entertainment: monthlySavings * 0.3,
-                  utilities: monthlySavings * 0.2,
-                  healthcare: monthlySavings * 0.1,
-                  other: monthlySavings * 0.1
-                }
-              }}
-              className="border-t border-gray-700 pt-6 mt-6"
-            />
-          </div>
-        )}
       </CardContent>
     </Card>
   );
