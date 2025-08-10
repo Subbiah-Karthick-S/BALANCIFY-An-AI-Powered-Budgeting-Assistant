@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { QuestionnaireData } from "@shared/schema";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const ai = new GoogleGenAI({ apiKey: "AIzaSyDL1WX8fKBDBCF0l3qmnFcl2NdBiaORHJs" });
 
 export interface FinancialInsights {
   spendingPatterns: string;
