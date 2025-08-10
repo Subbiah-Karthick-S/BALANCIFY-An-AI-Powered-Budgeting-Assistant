@@ -114,33 +114,29 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
   const currentQuestion = questions[currentStep];
   const progress = ((currentStep + 1) / questions.length) * 100;
 
-  // Load session data on mount
+  // Initialize session data on first mount only
   useEffect(() => {
-    if (session && session.userName) {
-      // Load session name into form if form is empty
-      if (!formData?.name) {
-        updateFormData({ name: session.userName });
-      }
-      // Load any saved form data from session
-      if (session.formData) {
-        loadFormDataFromSession(session.formData);
-      }
+    if (session?.userName && !formData?.name) {
+      updateFormData({ name: session.userName });
     }
-  }, [session, formData?.name, updateFormData, loadFormDataFromSession]);
+  }, [session?.userName, updateFormData]);
 
-  // Create/update session when user enters name
+  // Save form data to session when it changes
   useEffect(() => {
-    if (formData?.name && formData.name.length > 0) {
-      if (!session || session.userName !== formData.name) {
-        createSession(formData.name);
-      } else {
-        // Update session with current form data
-        if (updateSession) {
-          updateSession({ formData });
-        }
-      }
+    if (formData?.name && formData.name.length > 0 && session?.userName === formData.name) {
+      updateSession({ formData });
     }
-  }, [formData, session, createSession, updateSession]);
+  }, [formData, session?.userName, updateSession]);
+
+  // Create session when user first enters their name
+  const handleFormChange = (newData: Partial<FinancialData>) => {
+    updateFormData(newData);
+    
+    // Create session when name is entered for the first time
+    if (newData.name && newData.name.length > 0 && !session) {
+      createSession(newData.name);
+    }
+  };
 
   const handleNext = () => {
     if (currentStep === questions.length - 1) {
@@ -196,7 +192,7 @@ export function QuestionnairePage({ onComplete }: QuestionnairePageProps) {
         <QuestionForm
           question={currentQuestion}
           data={formData}
-          onDataChange={updateFormData}
+          onDataChange={handleFormChange}
           onNext={handleNext}
           onPrev={prevStep}
           isFirst={currentStep === 0}
