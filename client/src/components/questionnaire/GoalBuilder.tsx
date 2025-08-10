@@ -138,7 +138,7 @@ export function GoalBuilder({ value, onChange }: GoalBuilderProps) {
                   value={goal.timeline_months}
                   onChange={(e) => {
                     const value = parseFloat(e.target.value) || 1;
-                    const clampedValue = Math.min(Math.max(value, 1), 240);
+                    const clampedValue = Math.min(Math.max(value, 1), 600);
                     updateGoal(index, 'timeline_months', clampedValue);
                   }}
                   placeholder="24"
