@@ -58,17 +58,21 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   initialData,
   className = ""
 }) => {
-  // Calculate actual current savings as income - total expenses (not using preferred savings)
-  const currentIncome = initialData?.income?.monthly || 50000;
-  const totalExpenses = initialData?.expenses?.total || Object.values(initialData?.spendingBreakdown || {}).reduce((sum, val) => sum + (val || 0), 0) - (initialData?.spendingBreakdown?.savings || 0);
+  // Calculate actual current savings as income - total expenses (using actual user data)
+  const currentIncome = initialData?.income?.monthly || 0; // Use actual user income, no fallback
+  const totalExpenses = initialData?.expenses?.total || 0; // Use actual user expenses, no fallback
   const actualCurrentSavings = Math.max(0, currentIncome - totalExpenses);
   
-  // Debug logging
-  console.log('WhatIf Simulator Debug:', {
+  // Debug logging to verify we're using real user data
+  console.log('WhatIf Simulator - Using Real User Data:', {
     currentIncome,
     totalExpenses, 
     actualCurrentSavings,
-    initialData: initialData
+    receivedData: {
+      income: initialData?.income,
+      expenses: initialData?.expenses,
+      spendingBreakdown: initialData?.spendingBreakdown
+    }
   });
   
   const [simulationParams, setSimulationParams] = useState<SimulationParams>({
