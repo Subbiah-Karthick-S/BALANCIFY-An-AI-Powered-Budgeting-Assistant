@@ -182,71 +182,41 @@ function analyzeNeedsVsWants(data: QuestionnaireData, spending: SpendingBreakdow
   };
 }
 
-function parseFinancialGoals(financialGoalsText: string, monthlyIncome: number): FinancialGoal[] {
-  if (!financialGoalsText || financialGoalsText.trim() === '') {
-    return [];
+function parseFinancialGoals(financialGoalsArray: any[], monthlyIncome: number): FinancialGoal[] {
+  if (!Array.isArray(financialGoalsArray) || financialGoalsArray.length === 0) {
+    return [{
+      id: 'goal_1',
+      description: 'Emergency Fund',
+      targetAmount: 500000,
+      currentAmount: 0,
+      priority: 'high',
+      category: 'emergency'
+    }];
   }
 
-  const goals: FinancialGoal[] = [];
-  const goalTexts = financialGoalsText.split(/[,;]\s*|\n/).filter(text => text.trim());
-
-  goalTexts.forEach((goalText, index) => {
-    const text = goalText.trim().toLowerCase();
-    
-    // Extract amount using regex
-    const amountMatch = text.match(/(?:₹|rs\.?|rupees?)\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:lakhs?|lacs?|l|k|thousands?)?/i) || 
-                       text.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:lakhs?|lacs?|l|k|thousands?|₹|rs\.?)/i);
-    
-    let targetAmount = 500000; // Default target
-    if (amountMatch) {
-      const numStr = amountMatch[1].replace(/,/g, '');
-      let amount = parseFloat(numStr);
-      
-      // Check for units
-      if (text.includes('lakh') || text.includes('lac') || text.includes(' l ')) {
-        amount *= 100000;
-      } else if (text.includes('k') || text.includes('thousand')) {
-        amount *= 1000;
-      } else if (text.includes('crore')) {
-        amount *= 10000000;
-      }
-      
-      targetAmount = amount;
-    }
-
-    // Determine category based on keywords
-    let category: FinancialGoal['category'] = 'other';
-    if (text.includes('emergency') || text.includes('fund')) category = 'emergency';
-    else if (text.includes('house') || text.includes('car') || text.includes('bike') || text.includes('purchase')) category = 'purchase';
-    else if (text.includes('retirement') || text.includes('pension')) category = 'retirement';
-    else if (text.includes('education') || text.includes('study')) category = 'education';
-    else if (text.includes('invest') || text.includes('portfolio')) category = 'investment';
-
-    // Determine priority based on category and amount
-    let priority: FinancialGoal['priority'] = 'medium';
-    if (category === 'emergency' || targetAmount > monthlyIncome * 60) priority = 'high';
-    else if (targetAmount < monthlyIncome * 12) priority = 'low';
-
-    goals.push({
-      id: `goal_${index + 1}`,
-      description: goalText.trim(),
-      targetAmount,
-      currentAmount: Math.floor(targetAmount * 0.1), // Assume 10% already saved
-      priority,
-      category
-    });
-  });
-
-  return goals;
+  return financialGoalsArray.map((goal, index) => ({
+    id: `goal_${index + 1}`,
+    description: goal.description || 'Financial Goal',
+    targetAmount: goal.target_amount || 500000,
+    currentAmount: 0, // Starting fresh
+    priority: goal.priority || 'medium',
+    category: goal.category || 'other'
+  }));
 }
 
 function calculateGoalTimeline(data: QuestionnaireData, spending: SpendingBreakdown): GoalTimeline {
-  const targetAmount = data.target_amount; // Use actual target from questionnaire
-  const monthlyContribution = spending.savings + spending.investments; // Use actual savings + investments
+  // Use the highest priority goal as the primary target
+  const primaryGoal = data.financial_goals.sort((a, b) => {
+    const priorityOrder = { high: 3, medium: 2, low: 1 };
+    return priorityOrder[b.priority] - priorityOrder[a.priority];
+  })[0];
+  
+  const targetAmount = primaryGoal?.target_amount || 500000;
+  const monthlyContribution = spending.savings + spending.investments;
   const timeToGoal = Math.ceil(targetAmount / Math.max(monthlyContribution, 1000));
   
   const milestones = [];
-  const timelineMonths = Math.min(data.target_timeline_months, timeToGoal, 120);
+  const timelineMonths = Math.min(primaryGoal?.timeline_months || 24, timeToGoal, 120);
   for (let month = 6; month <= timelineMonths; month += 6) {
     milestones.push({
       month,
@@ -256,10 +226,10 @@ function calculateGoalTimeline(data: QuestionnaireData, spending: SpendingBreakd
   }
   
   return {
-    currentSavings: 0, // Assuming starting fresh
-    targetAmount: data.target_amount,
+    currentSavings: 0,
+    targetAmount,
     monthlyContribution,
-    timeToGoal: Math.min(timeToGoal, data.target_timeline_months),
+    timeToGoal: Math.min(timeToGoal, primaryGoal?.timeline_months || 24),
     milestones,
   };
 }

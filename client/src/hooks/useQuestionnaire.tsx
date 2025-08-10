@@ -51,9 +51,13 @@ export function useQuestionnaire() {
         // Investments & Financial Goals
         investment_types: data.investment_types || [],
         monthly_investment: data.monthly_investment || 0,
-        financial_goals: data.financial_goals || "",
-        target_amount: data.target_amount || 1000000,
-        target_timeline_months: data.target_timeline_months || 36,
+        financial_goals: data.financial_goals || [{
+          description: "Emergency Fund",
+          target_amount: 500000,
+          timeline_months: 24,
+          priority: "high",
+          category: "emergency"
+        }],
         
         // Budgeting Behavior & Mindset
         track_spending: data.track_spending || "No",

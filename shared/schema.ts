@@ -69,9 +69,13 @@ export const questionnaireDataSchema = z.object({
   // Investments & Financial Goals
   investment_types: z.array(z.string()),
   monthly_investment: z.number().min(0),
-  financial_goals: z.string(),
-  target_amount: z.number().min(1000),
-  target_timeline_months: z.number().min(1).max(120),
+  financial_goals: z.array(z.object({
+    description: z.string().min(1),
+    target_amount: z.number().min(1000),
+    timeline_months: z.number().min(1).max(120),
+    priority: z.enum(["high", "medium", "low"]),
+    category: z.enum(["emergency", "investment", "purchase", "retirement", "education", "other"])
+  })),
   
   // Budgeting Behavior & Mindset
   track_spending: z.enum(["Yes", "No"]),

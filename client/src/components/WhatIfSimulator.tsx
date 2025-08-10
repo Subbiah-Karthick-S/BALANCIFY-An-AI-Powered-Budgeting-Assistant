@@ -10,6 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Zap, Play, RotateCcw, TrendingUp, Target, AlertCircle, CheckCircle } from 'lucide-react';
 import LiveTransformationChart from './charts/LiveTransformationChart';
 import GoalTimelineChart from './charts/GoalTimelineChart';
+import TransformationAnalysis from './TransformationAnalysis';
 
 interface SimulationParams {
   incomeIncrease: number;
@@ -149,7 +150,7 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       expenseReduction: 0,
       additionalSavings: 0,
       investmentBoost: 0,
-      goalTarget: initialData?.financialGoals?.[0]?.targetAmount || 1000000
+      goalTarget: initialData?.financialGoals?.[0]?.targetAmount || initialData?.financialGoals?.[0]?.target_amount || 500000
     });
     setSimulationResult(null);
     setSelectedScenario('custom');
@@ -446,6 +447,13 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               isSimulating={isSimulating}
             />
           )}
+
+          {/* Transformation Analysis */}
+          <TransformationAnalysis
+            goals={initialData?.financialGoals || []}
+            currentMonthlySavings={actualCurrentSavings}
+            simulatedMonthlySavings={calculatePotentialSavings()}
+          />
         </div>
       )}
 

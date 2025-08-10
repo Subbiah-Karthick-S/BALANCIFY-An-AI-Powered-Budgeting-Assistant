@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Question, QuestionField } from '@/types/financial';
 import { ChevronLeft, ChevronRight, Rocket } from 'lucide-react';
+import { GoalBuilder } from './GoalBuilder';
 
 interface QuestionFormProps {
   question: Question;
@@ -200,6 +201,22 @@ export function QuestionForm({
                 <span>{field.max}</span>
               </div>
             </div>
+          </div>
+        );
+
+      case 'goal-builder':
+        return (
+          <div key={field.id} className="space-y-2">
+            <GoalBuilder
+              value={value || [{
+                description: "Emergency Fund",
+                target_amount: 500000,
+                timeline_months: 24,
+                priority: "high",
+                category: "emergency"
+              }]}
+              onChange={(goals) => handleFieldChange(field.id, goals)}
+            />
           </div>
         );
 
