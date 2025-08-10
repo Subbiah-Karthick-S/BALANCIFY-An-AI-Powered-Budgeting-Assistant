@@ -3,11 +3,13 @@ import { CosmicBackground } from '@/components/ui/cosmic-background';
 import { useQuestionnaire } from '@/hooks/useQuestionnaire';
 import { Question } from '@/types/financial';
 import { useEffect } from 'react';
+import { useSession } from '@/hooks/useSession';
 
 const questions: Question[] = [
   {
-    title: "Salary & Income",
+    title: "Personal Information & Income",
     fields: [
+      { type: "text", label: "Your Name", id: "name", placeholder: "Enter your full name" },
       { type: "number", label: "Monthly Income (₹)", id: "monthly_income", placeholder: "50000" },
       { type: "radio", label: "Do you have side income?", id: "side_income", options: ["Yes", "No"] },
       { type: "number", label: "Side Income Amount (₹)", id: "side_income_amount", placeholder: "10000", condition: "side_income=Yes" },

@@ -29,6 +29,9 @@ export const financialAnalyses = pgTable("financial_analyses", {
 
 // Questionnaire data schema
 export const questionnaireDataSchema = z.object({
+  // Personal Information
+  name: z.string().min(1, "Name is required"),
+  
   // Salary & Income
   monthly_income: z.number().min(0),
   side_income: z.enum(["Yes", "No"]),

@@ -11,9 +11,12 @@ import { AIInsights } from '@/components/dashboard/AIInsights';
 import WhatIfSimulator from '@/components/WhatIfSimulator';
 import { ComparisonTable } from '@/components/dashboard/ComparisonTable';
 import { AnalysisResult } from '@/types/financial';
-import { Download, RotateCcw } from 'lucide-react';
+import { Download, RotateCcw, LogOut, Target } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import IndividualGoalChart from '@/components/charts/IndividualGoalChart';
+import OverallGoalsTimeline from '@/components/charts/OverallGoalsTimeline';
+import { useSession } from '@/hooks/useSession';
 
 interface DashboardPageProps {
   analysisResult: AnalysisResult;
@@ -22,6 +25,16 @@ interface DashboardPageProps {
 
 export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps) {
   const { toast } = useToast();
+  const { session, endSession } = useSession();
+
+  const handleEndSession = () => {
+    endSession();
+    onStartNew();
+    toast({
+      title: "Session Ended",
+      description: "Your session has been ended. You can start a new analysis anytime.",
+    });
+  };
   
   const downloadReport = useMutation({
     mutationFn: async () => {
@@ -110,12 +123,28 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
       
       <div className="relative z-10 py-20">
         <div className="max-w-7xl mx-auto px-4">
-          {/* Dashboard Header */}
-          <div className="text-center mb-12">
-            <h2 className="font-orbitron text-4xl font-bold mb-4">
-              <span className="neon-text text-neon-cyan">Mission Analysis</span>
-            </h2>
-            <p className="text-xl text-gray-300">Your Financial Cosmos Mapped</p>
+          {/* Dashboard Header with Session */}
+          <div className="flex justify-between items-start mb-12">
+            <div className="text-center flex-1">
+              <h2 className="font-orbitron text-4xl font-bold mb-4">
+                <span className="neon-text text-neon-cyan">Mission Analysis</span>
+              </h2>
+              {session?.userName && (
+                <p className="text-neon-cyan text-lg mb-2">
+                  Welcome back, {session.userName}!
+                </p>
+              )}
+              <p className="text-xl text-gray-300">Your Financial Cosmos Mapped</p>
+            </div>
+            
+            <Button
+              onClick={handleEndSession}
+              variant="outline"
+              className="cosmic-button border-red-500 text-red-400 hover:bg-red-500/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              End Session
+            </Button>
           </div>
 
           {/* Main Dashboard Grid */}
@@ -208,7 +237,43 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
             />
           </div>
 
-          {/* Goal Timeline */}
+          {/* Individual Goal Analysis */}
+          {analysisResult.financialGoals && analysisResult.financialGoals.length > 0 && (
+            <div className="mb-8">
+              <div className="text-center mb-8">
+                <h3 className="font-orbitron text-2xl font-bold mb-4">
+                  <span className="neon-text text-neon-cyan flex items-center justify-center gap-2">
+                    <Target className="w-6 h-6" />
+                    Individual Goal Analysis
+                  </span>
+                </h3>
+                <p className="text-gray-300">Detailed breakdown and timeline for each of your financial goals</p>
+              </div>
+              
+              <div className="space-y-8">
+                {analysisResult.financialGoals.map((goal, index) => (
+                  <IndividualGoalChart
+                    key={goal.id || index}
+                    goal={goal}
+                    monthlySavings={analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments}
+                    goalIndex={index}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Overall Goals Timeline */}
+          {analysisResult.financialGoals && analysisResult.financialGoals.length > 1 && (
+            <div className="mb-8">
+              <OverallGoalsTimeline
+                goals={analysisResult.financialGoals}
+                monthlySavings={analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments}
+              />
+            </div>
+          )}
+
+          {/* Primary Goal Timeline (for single goal or summary) */}
           <Card className="cosmic-card mb-8">
             <CardContent className="p-8">
               <GoalTimelineChart

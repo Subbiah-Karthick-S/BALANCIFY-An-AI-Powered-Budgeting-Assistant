@@ -11,6 +11,9 @@ export function useQuestionnaire() {
     mutationFn: async (data: FinancialData): Promise<AnalysisResult> => {
       // Ensure all required fields have default values
       const sanitizedData = {
+        // Personal Information
+        name: data.name || "",
+        
         // Salary & Income
         monthly_income: data.monthly_income || 0,
         side_income: data.side_income || "No",
