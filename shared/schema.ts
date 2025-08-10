@@ -72,7 +72,7 @@ export const questionnaireDataSchema = z.object({
   financial_goals: z.array(z.object({
     description: z.string().min(1),
     target_amount: z.number().min(1000),
-    timeline_months: z.number().min(1).max(120),
+    timeline_months: z.number().min(1).max(240),
     priority: z.enum(["high", "medium", "low"]),
     category: z.enum(["emergency", "investment", "purchase", "retirement", "education", "other"])
   })),

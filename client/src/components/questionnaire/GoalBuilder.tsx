@@ -131,15 +131,19 @@ export function GoalBuilder({ value, onChange }: GoalBuilderProps) {
               <div>
                 <Label className="text-gray-300 text-sm flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  Timeline (Months)
+                  Timeline (Months) - Max 20 years
                 </Label>
                 <Input
                   type="number"
                   value={goal.timeline_months}
-                  onChange={(e) => updateGoal(index, 'timeline_months', parseFloat(e.target.value) || 1)}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value) || 1;
+                    const clampedValue = Math.min(Math.max(value, 1), 240);
+                    updateGoal(index, 'timeline_months', clampedValue);
+                  }}
                   placeholder="24"
                   min="1"
-                  max="120"
+                  max="240"
                   className="bg-gray-800/50 border-gray-600 focus:border-neon-cyan text-white"
                 />
               </div>

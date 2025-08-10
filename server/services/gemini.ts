@@ -216,7 +216,7 @@ function calculateGoalTimeline(data: QuestionnaireData, spending: SpendingBreakd
   const timeToGoal = Math.ceil(targetAmount / Math.max(monthlyContribution, 1000));
   
   const milestones = [];
-  const timelineMonths = Math.min(primaryGoal?.timeline_months || 24, timeToGoal, 120);
+  const timelineMonths = Math.min(primaryGoal?.timeline_months || 24, timeToGoal, 240);
   for (let month = 6; month <= timelineMonths; month += 6) {
     milestones.push({
       month,
