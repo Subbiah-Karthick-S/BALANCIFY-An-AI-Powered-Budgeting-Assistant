@@ -2,28 +2,25 @@ import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { FinancialData, AnalysisResult } from '@/types/financial';
-import { 
-  saveSessionData, 
-  getSessionData, 
-  hasSessionData, 
-  clearSessionData, 
-  updateSessionStep, 
-  updateSessionData 
-} from '@/utils/session-storage';
+import { useSession } from './useSession';
 
 export function useQuestionnaire() {
+  const { getSessionData, getCurrentStep, saveFormProgress, hasActiveSession } = useSession();
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<Partial<FinancialData>>({});
-  const [sessionRestored, setSessionRestored] = useState(false);
 
   // Load session data on component mount
   useEffect(() => {
-    const sessionData = getSessionData();
-    if (sessionData) {
-      setFormData(sessionData.questionnaireData);
-      setCurrentStep(sessionData.currentStep);
-      setSessionRestored(true);
-      console.log('Session restored:', { step: sessionData.currentStep, dataKeys: Object.keys(sessionData.questionnaireData) });
+    if (hasActiveSession()) {
+      const sessionData = getSessionData();
+      const sessionStep = getCurrentStep();
+      
+      if (sessionData) {
+        setFormData(sessionData);
+      }
+      if (sessionStep >= 0) {
+        setCurrentStep(sessionStep);
+      }
     }
   }, []);
 
@@ -31,8 +28,8 @@ export function useQuestionnaire() {
     mutationFn: async (data: FinancialData): Promise<AnalysisResult> => {
       // Ensure all required fields have default values
       const sanitizedData = {
-        // Personal Information - using any to handle form field
-        name: (data as any).name || "",
+        // Personal Information
+        name: data.name || "",
         
         // Salary & Income
         monthly_income: data.monthly_income || 0,
@@ -115,36 +112,36 @@ export function useQuestionnaire() {
     const newFormData = { ...formData, ...stepData };
     setFormData(newFormData);
     
-    // Save to localStorage automatically
-    updateSessionData(newFormData);
-    console.log('Form data updated and saved:', Object.keys(stepData));
+    // Save to session automatically
+    if (hasActiveSession()) {
+      saveFormProgress(newFormData, currentStep);
+    }
   };
 
   const nextStep = () => {
     const newStep = currentStep + 1;
     setCurrentStep(newStep);
     
-    // Save step progress to localStorage
-    updateSessionStep(newStep);
-    console.log('Advanced to step:', newStep);
+    // Save step progress to session
+    if (hasActiveSession()) {
+      saveFormProgress(formData, newStep);
+    }
   };
 
   const prevStep = () => {
     const newStep = Math.max(0, currentStep - 1);
     setCurrentStep(newStep);
     
-    // Save step progress to localStorage
-    updateSessionStep(newStep);
-    console.log('Moved back to step:', newStep);
+    // Save step progress to session
+    if (hasActiveSession()) {
+      saveFormProgress(formData, newStep);
+    }
   };
 
   const resetQuestionnaire = () => {
     setCurrentStep(0);
     setFormData({});
-    setSessionRestored(false);
-    clearSessionData();
     submitQuestionnaire.reset();
-    console.log('Questionnaire reset and session cleared');
   };
 
   const loadFormDataFromSession = (sessionData: Partial<FinancialData>) => {
@@ -158,11 +155,10 @@ export function useQuestionnaire() {
     nextStep,
     prevStep,
     resetQuestionnaire,
+    loadFormDataFromSession,
     submitQuestionnaire,
     isSubmitting: submitQuestionnaire.isPending,
     analysisResult: submitQuestionnaire.data,
     error: submitQuestionnaire.error,
-    sessionRestored,
-    hasSession: hasSessionData,
   };
 }
