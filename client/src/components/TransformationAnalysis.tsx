@@ -205,6 +205,38 @@ const TransformationAnalysis: React.FC<TransformationAnalysisProps> = ({
                       +₹{((simulatedMonthlySavings - currentMonthlySavings) * 12).toLocaleString()}
                     </td>
                   </tr>
+                  <tr className="border-b border-gray-800">
+                    <td className="py-3 text-white">5-Year Wealth Accumulation</td>
+                    <td className="py-3 text-center text-white">₹{(currentMonthlySavings * 60).toLocaleString()}</td>
+                    <td className="py-3 text-center text-neon-green">₹{(simulatedMonthlySavings * 60).toLocaleString()}</td>
+                    <td className="py-3 text-center text-stellar-gold">
+                      +₹{((simulatedMonthlySavings - currentMonthlySavings) * 60).toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-800">
+                    <td className="py-3 text-white">Investment Growth (10% p.a.)</td>
+                    <td className="py-3 text-center text-white">₹{Math.round(currentMonthlySavings * 12 * ((Math.pow(1.1, 5) - 1) / 0.1)).toLocaleString()}</td>
+                    <td className="py-3 text-center text-neon-green">₹{Math.round(simulatedMonthlySavings * 12 * ((Math.pow(1.1, 5) - 1) / 0.1)).toLocaleString()}</td>
+                    <td className="py-3 text-center text-stellar-gold">
+                      +₹{Math.round((simulatedMonthlySavings - currentMonthlySavings) * 12 * ((Math.pow(1.1, 5) - 1) / 0.1)).toLocaleString()}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-800">
+                    <td className="py-3 text-white">Financial Freedom Ratio</td>
+                    <td className="py-3 text-center text-white">{((currentMonthlySavings * 12) / 600000 * 100).toFixed(1)}%</td>
+                    <td className="py-3 text-center text-neon-green">{((simulatedMonthlySavings * 12) / 600000 * 100).toFixed(1)}%</td>
+                    <td className="py-3 text-center text-stellar-gold">
+                      +{(((simulatedMonthlySavings - currentMonthlySavings) * 12) / 600000 * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-800">
+                    <td className="py-3 text-white">Emergency Fund Months</td>
+                    <td className="py-3 text-center text-white">{(currentMonthlySavings / 25000).toFixed(1)} months</td>
+                    <td className="py-3 text-center text-neon-green">{(simulatedMonthlySavings / 25000).toFixed(1)} months</td>
+                    <td className="py-3 text-center text-stellar-gold">
+                      +{((simulatedMonthlySavings - currentMonthlySavings) / 25000).toFixed(1)} months
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

@@ -67,7 +67,13 @@ const IndividualGoalChart: React.FC<IndividualGoalChartProps> = ({
   }
 
   // Milestone markers
-  const milestones = [];
+  interface Milestone {
+    month: number;
+    percentage: number;
+    amount: number;
+  }
+  
+  const milestones: Milestone[] = [];
   const milestoneIntervals = [25, 50, 75, 90, 100];
   milestoneIntervals.forEach(percentage => {
     const milestoneAmount = (goal.targetAmount * percentage) / 100;
@@ -212,7 +218,7 @@ const IndividualGoalChart: React.FC<IndividualGoalChartProps> = ({
                   dataKey="projected"
                   stroke={categoryColors[goal.category]}
                   strokeWidth={2}
-                  fillUrl={`url(#goalGradient${goalIndex})`}
+                  fill={`url(#goalGradient${goalIndex})`}
                 />
                 <Line
                   type="monotone"

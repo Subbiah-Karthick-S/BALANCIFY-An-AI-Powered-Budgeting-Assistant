@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CosmicBackground } from '@/components/ui/cosmic-background';
@@ -17,6 +17,8 @@ import { useToast } from '@/hooks/use-toast';
 import IndividualGoalChart from '@/components/charts/IndividualGoalChart';
 import OverallGoalsTimeline from '@/components/charts/OverallGoalsTimeline';
 import { useSession } from '@/hooks/useSession';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface DashboardPageProps {
   analysisResult: AnalysisResult;
@@ -27,6 +29,7 @@ interface DashboardPageProps {
 export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: DashboardPageProps) {
   const { toast } = useToast();
   const { session, endSession } = useSession();
+  const dashboardRef = useRef<HTMLDivElement>(null);
 
   const handleEndSession = () => {
     endSession();
@@ -39,23 +42,59 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
   
   const downloadReport = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/report/${analysisResult.questionnaireId}`);
-      if (!response.ok) throw new Error('Failed to generate report');
-      return response.blob();
-    },
-    onSuccess: (blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `financial-report-${analysisResult.questionnaireId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (!dashboardRef.current) throw new Error('Dashboard not found');
       
       toast({
+        title: "Generating PDF",
+        description: "Please wait while we create your financial report...",
+      });
+
+      // Create canvas from the dashboard
+      const canvas = await html2canvas(dashboardRef.current, {
+        height: dashboardRef.current.scrollHeight,
+        width: dashboardRef.current.scrollWidth,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0A0A0F',
+        scale: 1.5, // Higher quality
+      });
+
+      // Create PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add additional pages if needed
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Save the PDF
+      const fileName = `Balancify-Financial-Report-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      
+      return true;
+    },
+    onSuccess: () => {
+      toast({
         title: "Report Downloaded",
-        description: "Your financial analysis report has been downloaded successfully.",
+        description: "Your complete financial analysis report has been downloaded successfully.",
       });
     },
     onError: () => {
@@ -122,7 +161,7 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
     <div className="min-h-screen relative">
       <CosmicBackground />
       
-      <div className="relative z-10 py-20">
+      <div className="relative z-10 py-20" ref={dashboardRef}>
         <div className="max-w-7xl mx-auto px-4">
           {/* Dashboard Header with Session */}
           <div className="flex justify-between items-start mb-12">
@@ -290,7 +329,6 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
                   goalName={analysisResult.financialGoals?.[0]?.description || "Primary Financial Goal"}
                   targetAmount={analysisResult.goalTimeline.targetAmount}
                   currentAmount={analysisResult.goalTimeline.currentSavings}
-                  monthlyContribution={analysisResult.goalTimeline?.monthlyContribution || 0}
                   actualSavings={analysisResult.spendingBreakdown?.savings || 0}
                   projectedDate={`${new Date().getFullYear() + Math.ceil(analysisResult.goalTimeline.timeToGoal / 12)}-12-31`}
                 />
@@ -308,8 +346,8 @@ export function DashboardPage({ analysisResult, onStartNew, onBackToHome }: Dash
             <WhatIfSimulator
               questionnaireId={analysisResult.questionnaireId || `session-${Date.now()}`}
               initialData={{
-                income: { monthly: analysisResult.monthlyIncome || 0 },
-                expenses: { total: analysisResult.totalExpenses || 0 },
+                income: { monthly: totalExpenses + analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments },
+                expenses: { total: totalExpenses },
                 currentSavings: analysisResult.goalTimeline?.currentSavings || 0,
                 financialGoals: analysisResult.financialGoals || [],
                 spendingBreakdown: analysisResult.spendingBreakdown || {}
