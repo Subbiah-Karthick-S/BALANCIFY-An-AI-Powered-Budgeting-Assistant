@@ -57,6 +57,11 @@ export interface FinancialData {
   investment_types: string[];
   monthly_investment: number;
   financial_goals: string;
+  parsed_goals?: {
+    description: string;
+    amount: number;
+    timeToAchieve?: number;
+  }[];
   
   // Budgeting Behavior & Mindset
   track_spending: "Yes" | "No";
@@ -116,6 +121,13 @@ export interface AnalysisResult {
       description: string;
     }[];
   };
+  individualGoals?: {
+    description: string;
+    amount: number;
+    timeToAchieve: number;
+    monthlyRequired: number;
+    feasibility: string;
+  }[];
 }
 
 export interface SimulationAdjustments {

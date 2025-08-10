@@ -13,6 +13,8 @@ import { AnalysisResult } from '@/types/financial';
 import { Download, RotateCcw } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import FinancialGoalsChart from '@/components/charts/FinancialGoalsChart';
+
 
 interface DashboardPageProps {
   analysisResult: AnalysisResult;
@@ -21,7 +23,7 @@ interface DashboardPageProps {
 
 export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps) {
   const { toast } = useToast();
-  
+
   const downloadReport = useMutation({
     mutationFn: async () => {
       const response = await fetch(`/api/report/${analysisResult.questionnaireId}`);
@@ -37,7 +39,7 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       toast({
         title: "Report Downloaded",
         description: "Your financial analysis report has been downloaded successfully.",
@@ -103,10 +105,27 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
 
   const totalExpenses = Object.values(analysisResult.spendingBreakdown).reduce((sum, val) => sum + val, 0) - analysisResult.spendingBreakdown.savings - analysisResult.spendingBreakdown.investments;
 
+  // Placeholder data for charts (replace with actual data from analysisResult)
+  const goalTimelineData = [
+    { month: "Jan", currentProgress: 50000, projectedProgress: 55000, simulatedProgress: 0, goalTarget: 1000000 },
+    { month: "Feb", currentProgress: 65000, projectedProgress: 70000, simulatedProgress: 0, goalTarget: 1000000 },
+    { month: "Mar", currentProgress: 80000, projectedProgress: 85000, simulatedProgress: 0, goalTarget: 1000000 },
+    { month: "Apr", currentProgress: 95000, projectedProgress: 100000, simulatedProgress: 0, goalTarget: 1000000 },
+    { month: "May", currentProgress: 110000, projectedProgress: 115000, simulatedProgress: 0, goalTarget: 1000000 },
+    { month: "Jun", currentProgress: 125000, projectedProgress: 130000, simulatedProgress: 0, goalTarget: 1000000 }
+  ];
+
+  const cashFlowData = {
+    income: totalExpenses + analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments,
+    expenses: totalExpenses,
+    investments: analysisResult.spendingBreakdown.investments,
+    savings: analysisResult.spendingBreakdown.savings,
+  };
+
   return (
     <div className="min-h-screen relative">
       <CosmicBackground />
-      
+
       <div className="relative z-10 py-20">
         <div className="max-w-7xl mx-auto px-4">
           {/* Dashboard Header */}
@@ -169,10 +188,7 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
             <Card className="glass-effect border-white/20">
               <CardContent className="p-6">
                 <CashFlowChart
-                  income={totalExpenses + analysisResult.spendingBreakdown.savings + analysisResult.spendingBreakdown.investments}
-                  expenses={totalExpenses}
-                  investments={analysisResult.spendingBreakdown.investments}
-                  savings={analysisResult.spendingBreakdown.savings}
+                  data={cashFlowData}
                 />
               </CardContent>
             </Card>
@@ -201,14 +217,7 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
           <Card className="cosmic-card mb-8">
             <CardContent className="p-8">
               <GoalTimelineChart
-                data={[
-                  { month: "Jan", currentProgress: 50000, projectedProgress: 55000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Feb", currentProgress: 65000, projectedProgress: 70000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Mar", currentProgress: 80000, projectedProgress: 85000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Apr", currentProgress: 95000, projectedProgress: 100000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "May", currentProgress: 110000, projectedProgress: 115000, simulatedProgress: 0, goalTarget: 1000000 },
-                  { month: "Jun", currentProgress: 125000, projectedProgress: 130000, simulatedProgress: 0, goalTarget: 1000000 }
-                ]}
+                data={goalTimelineData}
                 goalName="Emergency Fund"
                 targetAmount={1000000}
                 currentAmount={50000}
@@ -216,6 +225,13 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
               />
             </CardContent>
           </Card>
+
+          {/* Financial Goals Chart */}
+          {analysisResult.individualGoals && analysisResult.individualGoals.length > 0 && (
+            <div className="mb-8">
+              <FinancialGoalsChart goals={analysisResult.individualGoals} />
+            </div>
+          )}
 
           {/* Before/After Comparison */}
           <div className="mb-8">
@@ -232,7 +248,7 @@ export function DashboardPage({ analysisResult, onStartNew }: DashboardPageProps
               <Download className="mr-3 w-5 h-5" />
               {downloadReport.isPending ? 'Generating...' : 'Download Mission Report (PDF)'}
             </Button>
-            
+
             <Button
               onClick={onStartNew}
               variant="outline"

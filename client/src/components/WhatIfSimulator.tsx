@@ -10,6 +10,7 @@ import { apiRequest } from '@/lib/queryClient';
 import { Zap, Play, RotateCcw, TrendingUp, Target, AlertCircle, CheckCircle } from 'lucide-react';
 import LiveTransformationChart from './charts/LiveTransformationChart';
 import GoalTimelineChart from './charts/GoalTimelineChart';
+import FinancialGoalsChart from './charts/FinancialGoalsChart';
 
 interface SimulationParams {
   incomeIncrease: number;
@@ -44,6 +45,13 @@ interface SimulationResult {
       milestone?: string;
     }>;
   };
+  individualGoals?: Array<{
+    description: string;
+    amount: number;
+    timeToAchieve: number;
+    monthlyRequired: number;
+    feasibility: string;
+  }>;
 }
 
 interface WhatIfSimulatorProps {
@@ -442,6 +450,11 @@ const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
               simulatedDate={simulationResult.insights?.timeToGoal || 'Calculating...'}
               isSimulating={isSimulating}
             />
+          )}
+
+          {/* Financial Goals Chart */}
+          {simulationResult.individualGoals && simulationResult.individualGoals.length > 0 && (
+            <FinancialGoalsChart goals={simulationResult.individualGoals} />
           )}
         </div>
       )}

@@ -69,6 +69,13 @@ export async function analyzeFinancialData(data: QuestionnaireData): Promise<{
   needsWantsAnalysis: NeedsWantsAnalysis;
   recommendations: Recommendations;
   goalTimeline: GoalTimeline;
+  individualGoals: {
+    description: string;
+    amount: number;
+    timeToAchieve: number;
+    monthlyRequired: number;
+    feasibility: string;
+  }[];
 }> {
   try {
     // Calculate spending breakdown
@@ -76,6 +83,10 @@ export async function analyzeFinancialData(data: QuestionnaireData): Promise<{
     
     // Analyze needs vs wants
     const needsWantsAnalysis = analyzeNeedsVsWants(data, spendingBreakdown);
+    
+    // Parse and analyze individual goals
+    const parsedGoals = parseFinancialGoals(data.financial_goals);
+    const individualGoals = calculateIndividualGoals(parsedGoals, spendingBreakdown, data);
     
     // Calculate goal timeline
     const goalTimeline = calculateGoalTimeline(data, spendingBreakdown);
@@ -92,6 +103,7 @@ export async function analyzeFinancialData(data: QuestionnaireData): Promise<{
       needsWantsAnalysis,
       recommendations,
       goalTimeline,
+      individualGoals,
     };
   } catch (error) {
     throw new Error(`Failed to analyze financial data: ${error}`);
@@ -160,6 +172,63 @@ function analyzeNeedsVsWants(data: QuestionnaireData, spending: SpendingBreakdow
     needsPercentage: Math.round((totalNeeds / totalSpending) * 100),
     wantsPercentage: Math.round((totalWants / totalSpending) * 100),
   };
+}
+
+function parseFinancialGoals(goalsString: string): { description: string; amount: number }[] {
+  const goals: { description: string; amount: number }[] = [];
+  
+  // Split by comma and parse each goal
+  const goalParts = goalsString.split(',').map(g => g.trim());
+  
+  for (const goalPart of goalParts) {
+    // Look for patterns like "Purchase house for 400000" or "Car 500000"
+    const match = goalPart.match(/(.+?)(?:for\s+)?(\d+)$/i);
+    if (match) {
+      const description = match[1].trim();
+      const amount = parseInt(match[2]);
+      if (description && amount > 0) {
+        goals.push({ description, amount });
+      }
+    }
+  }
+  
+  return goals;
+}
+
+function calculateIndividualGoals(
+  goals: { description: string; amount: number }[],
+  spending: SpendingBreakdown,
+  data: QuestionnaireData
+): {
+  description: string;
+  amount: number;
+  timeToAchieve: number;
+  monthlyRequired: number;
+  feasibility: string;
+}[] {
+  const availableForGoals = data.preferred_savings + (data.monthly_investment * 0.3); // 30% of investment can go to goals
+  
+  return goals.map(goal => {
+    // Calculate time to achieve based on available savings
+    const monthlyRequired = goal.amount / 60; // Assume 5 years max
+    const timeToAchieve = Math.ceil(goal.amount / availableForGoals);
+    
+    // Determine feasibility
+    let feasibility = 'High';
+    if (monthlyRequired > availableForGoals * 0.8) {
+      feasibility = 'Low';
+    } else if (monthlyRequired > availableForGoals * 0.5) {
+      feasibility = 'Medium';
+    }
+    
+    return {
+      description: goal.description,
+      amount: goal.amount,
+      timeToAchieve: Math.min(timeToAchieve, 120), // Max 10 years
+      monthlyRequired: Math.round(monthlyRequired),
+      feasibility
+    };
+  });
 }
 
 function calculateGoalTimeline(data: QuestionnaireData, spending: SpendingBreakdown): GoalTimeline {
